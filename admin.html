@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelForge Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080808;
+      --bg-card: rgba(255,255,255,0.03);
+      --bg-active: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.1);
+      --accent-orange: #f97316;
+      --accent-blue: #0ea5e9;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- LOGIN SCREEN --- */
+    #login-screen {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg); z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+    #login-screen h1 {
+      font-family: 'Bebas Neue', cursive; font-size: 4rem; letter-spacing: 4px;
+      margin-bottom: 2rem; color: #fff;
+    }
+    .login-form {
+      display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 380px;
+    }
+    .login-form input {
+      flex: 1; padding: 12px 16px; border-radius: var(--radius);
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: white; font-size: 1rem; outline: none; transition: 0.2s;
+    }
+    .login-form input:focus { border-color: var(--accent-blue); }
+    .login-form input.error { border-color: var(--danger); animation: shake 0.4s; }
+    .login-form button {
+      padding: 12px 24px; border-radius: var(--radius); border: none;
+      background: var(--accent-blue); color: #fff; font-weight: bold;
+      cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 4px;
+    }
+    .login-form button:hover { background: #0284c7; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    /* --- TOAST --- */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 12px 24px; border-radius: 8px; font-weight: 500;
+      background: #111; color: #fff; border: 1px solid var(--border);
+      transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* --- ADMIN PANEL OVERALL --- */
+    #admin-panel {
+      display: none; padding: 40px 24px; max-width: 1400px; margin: 0 auto;
+    }
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+    }
+    .header-text h1 {
+      font-family: 'Bebas Neue', cursive; font-size: 3.5rem; letter-spacing: 2px;
+      background: -webkit-linear-gradient(0deg, var(--accent-orange), var(--accent-blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1; margin-bottom: 8px;
+    }
+    .header-text p { color: var(--text-muted); font-size: 1.1rem; }
+    
+    /* --- TABS --- */
+    .tabs-container {
+      display: flex; gap: 12px; margin-bottom: 32px;
+      border-bottom: 1px solid var(--border); padding-bottom: 12px;
+    }
+    .tab-btn {
+      background: none; border: none; color: var(--text-muted); padding: 8px 16px;
+      font-size: 1.1rem; font-family: 'Cabinet Grotesk', inherit; cursor: pointer;
+      font-weight: 600; border-radius: 8px; transition: 0.3s; position: relative;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--bg-active); }
+    .tab-btn.active { color: var(--accent-orange); }
+    .tab-btn.active::after {
+      content: ''; position: absolute; left: 0; bottom: -13px;
+      width: 100%; height: 2px; background: var(--accent-orange);
+    }
+
+    .view-section { display: none; animation: fadeIn 0.4s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- CONTROLS --- */
+    .controls-bar {
+      display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .controls-bar .left { margin-right: auto; display: flex; gap: 12px; }
+    
+    .btn {
+      padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; font-family: inherit; color: white;
+      display: flex; align-items: center; gap: 8px; font-size: 0.95rem;
+    }
+    .btn-approve-all { background: var(--accent-orange); }
+    .btn-approve-all:hover { box-shadow: 0 0 15px rgba(249,115,22,0.4); }
+    .btn-reject-all { background: var(--danger); }
+    .btn-reject-all:hover { box-shadow: 0 0 15px rgba(239,68,68,0.4); }
+
+    .search-input {
+      background: var(--bg-card); border: 1px solid var(--border); color: #fff;
+      padding: 10px 16px; border-radius: 8px; font-family: inherit; width: 250px;
+    }
+    .filter-select {
+      background: var(--bg-card); border: 1px solid var(--border); color: #fff;
+      padding: 10px 16px; border-radius: 8px; font-family: inherit;
+    }
+    select option {
+      background: #1a1a1a;
+      color: #e2e8f0;
+    }
+
+    /* --- GRID --- */
+    .grid { columns: 3; column-gap: 24px; padding-bottom: 24px; }
+    @media (max-width: 1024px) { .grid { columns: 2; } }
+    @media (max-width: 640px) { .grid { columns: 1; } }
+    
+    .empty-state {
+      column-span: all; text-align: center; padding: 80px 20px;
+      color: var(--text-muted); font-size: 1.2rem; background: var(--bg-card);
+      border-radius: var(--radius); border: 1px dashed var(--border);
+    }
+
+    /* --- CARD --- */
+    .card {
+      break-inside: avoid; margin-bottom: 24px;
+      background: #0f0f0f; border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      position: relative;
+    }
+    .card.removing { opacity: 0; transform: scale(0.95); pointer-events: none; }
+    .card-img {
+      width: 100%; height: auto; object-fit: cover; cursor: zoom-in;
+      border-bottom: 1px solid var(--border); background: #111;
+      border-radius: 12px 12px 0 0;
+    }
+    .card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .input-ui {
+      background: var(--bg-card); border: 1px solid var(--border); color: #fff;
+      padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 0.9rem;
+      outline: none; transition: 0.2s; width: 100%;
+    }
+    .input-ui:focus { border-color: var(--accent-blue); }
+    
+    .meta-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: auto; padding-top: 8px; }
+    
+    .card-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .action-btn {
+      flex: 1; padding: 12px; border: none; border-radius: 6px; color: white;
+      font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; display: flex; align-items:center; justify-content:center; gap: 6px;
+    }
+    .action-btn.approve { background: var(--success); }
+    .action-btn.approve:hover { filter: brightness(1.1); box-shadow: 0 0 15px rgba(34,197,94,0.3); }
+    .action-btn.reject { background: #333; color: #ff5555; border: 1px solid #ff5555; }
+    .action-btn.reject:hover { background: #ff5555; color: white; box-shadow: 0 0 15px rgba(255,85,85,0.3); }
+    .action-btn.save { background: var(--accent-blue); }
+    .action-btn.save:hover { filter: brightness(1.1); box-shadow: 0 0 15px rgba(14,165,233,0.3); }
+
+    /* --- Lightbox --- */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .lightbox-overlay.active { opacity: 1; pointer-events: auto; }
+    #lightbox-close { position: absolute; top: 24px; right: 24px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; opacity: 0.7; transition: 0.2s; }
+    #lightbox-close:hover { opacity: 1; }
+    #lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    .lightbox-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 32px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .lightbox-info h2 { font-family: 'Inter', sans-serif; font-size: 1.2rem; margin-bottom: 8px; font-weight: 600; }
+    #lightbox-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag { padding: 2px 8px; border-radius: 100px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); color: var(--text-muted); font-size: .6rem; font-weight: 500; white-space: nowrap; }
+
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <h1>PIXELFORGE ADMIN</h1>
+    <form class="login-form" id="login-form">
+      <input type="text" id="username" placeholder="Enter username..." autofocus autocomplete="off">
+      <input type="password" id="password" placeholder="Enter admin password..." autocomplete="off">
+      <button type="submit">ENTER</button>
+      <div id="login-error" style="color: var(--danger); font-size: 0.85rem; text-align: center; opacity: 0; transition: opacity 0.2s;">Invalid credentials</div>
+    </form>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast">Action Successful!</div>
+
+  <!-- ADMIN PANEL -->
+  <div id="admin-panel">
+    <div class="header">
+      <div class="header-text">
+        <h1>PIXELFORGE ADMIN</h1>
+        <p id="system-status">Manage Database</p>
+      </div>
+    </div>
+    
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchTab('pending')" id="tab-pending">Pending Review</button>
+      <button class="tab-btn" onclick="switchTab('library')" id="tab-library">Live Library</button>
+    </div>
+
+    <!-- PENDING VIEW -->
+    <div id="view-pending" class="view-section active">
+      <div class="controls-bar">
+        <div class="left"><span id="pending-count" style="align-self:center; color:var(--text-muted); font-weight:600;">Loading...</span></div>
+        <button class="btn btn-approve-all" onclick="bulkAction('approve')">APPROVE ALL</button>
+        <button class="btn btn-reject-all" onclick="bulkAction('reject')">REJECT ALL</button>
+      </div>
+      <div class="grid" id="grid-pending"></div>
+    </div>
+
+    <!-- LIBRARY VIEW -->
+    <div id="view-library" class="view-section">
+      <div class="controls-bar">
+        <div class="left"><span id="library-count" style="align-self:center; color:var(--text-muted); font-weight:600;">Loading...</span></div>
+        <input type="text" id="lib-search" class="search-input" placeholder="Search title..." oninput="renderLibrary()" />
+        <select id="lib-category-filter" class="filter-select" onchange="renderLibrary()">
+          <option value="All">All Categories</option>
+          <option value="Anime">Anime</option>
+          <option value="Dark">Dark</option>
+          <option value="Sci-Fi">Sci-Fi</option>
+          <option value="Nature">Nature</option>
+          <option value="Abstract">Abstract</option>
+          <option value="Cyberpunk">Cyberpunk</option>
+          <option value="Minimal">Minimal</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="AI Art">AI Art</option>
+        </select>
+      </div>
+      <div class="grid" id="grid-library"></div>
+    </div>
+
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <button id="lightbox-close">✕</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-info">
+      <div>
+        <h2 id="lightbox-title"></h2>
+        <div id="lightbox-tags"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const categories = ["Anime", "Dark", "Sci-Fi", "Nature", "Abstract", "Cyberpunk", "Minimal", "Fantasy", "AI Art"];
+    let pendingData = [];
+    let libraryData = [];
+
+    /* LOGIN LOGIC */
+    const loginForm = document.getElementById('login-form');
+    const pwdInput = document.getElementById('password');
+    const userInput = document.getElementById('username');
+    const loginErr = document.getElementById('login-error');
+    const loginScreen = document.getElementById('login-screen');
+    const adminPanel = document.getElementById('admin-panel');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (userInput.value === 'pixelforge' && pwdInput.value === 'pixelforge2026') {
+        loginScreen.style.opacity = '0';
+        setTimeout(() => {
+          loginScreen.style.display = 'none';
+          adminPanel.style.display = 'block';
+          fetchData();
+        }, 500);
+      } else {
+        pwdInput.classList.remove('error');
+        userInput.classList.remove('error');
+        void pwdInput.offsetWidth; 
+        void userInput.offsetWidth; 
+        pwdInput.classList.add('error');
+        userInput.classList.add('error');
+        loginErr.style.opacity = '1';
+        pwdInput.value = '';
+      }
+    });
+
+    /* TABS LOGIC */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      document.getElementById(`view-${tabId}`).classList.add('active');
+      
+      if(tabId === 'library' && libraryData.length === 0) fetchLibrary();
+    }
+
+    /* TOAST LOGIC */
+    let toastTimeout;
+    function showToast(msg, color = 'var(--success)') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.borderLeft = `4px solid ${color}`;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    /* DATA FETCH LOGIC */
+    async function fetchData() {
+      fetchPending();
+      fetchLibrary();
+    }
+
+    async function fetchPending() {
+      try {
+        const res = await fetch('/api/pending');
+        pendingData = await res.json();
+        renderPending();
+      } catch (err) { showToast('Failed fetching pending', 'var(--danger)'); }
+    }
+
+    async function fetchLibrary() {
+      try {
+        const res = await fetch('/api/wallpapers');
+        libraryData = await res.json();
+        renderLibrary();
+      } catch (err) { showToast('Failed fetching library', 'var(--danger)'); }
+    }
+
+    /* RENDERERS */
+    function buildCardHtml(wp, mode) {
+      const controlsHtml = mode === 'pending' ? `
+        <button class="action-btn approve" onclick="handlePendingAction('${wp.id}', 'approve')">APPROVE</button>
+        <button class="action-btn reject" onclick="handlePendingAction('${wp.id}', 'reject')">REJECT</button>
+      ` : `
+        <button class="action-btn save" onclick="handleLibraryAction('${wp.id}', 'update')">Save</button>
+        <button class="action-btn reject" onclick="removeWallpaper('${wp.id}')">Remove</button>
+      `;
+
+      return `
+        <div class="card" id="card-${wp.id}">
+          <img class="card-img" src="${wp.image_url}" onclick="openLightbox('${mode}', '${wp.id}')" loading="lazy">
+          <div class="card-body">
+            <div class="field">
+              <label>Title</label>
+              <input type="text" class="input-ui" id="title-${mode}-${wp.id}" value="${wp.title.replace(/"/g, '&quot;')}">
+            </div>
+            <div class="field">
+              <label>Category</label>
+              <select class="input-ui" id="cat-${mode}-${wp.id}">
+                ${categories.map(c => `<option value="${c}" ${wp.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Tags</label>
+              <input type="text" class="input-ui" id="tags-${mode}-${wp.id}" value="${(wp.tags || []).join(', ')}">
+            </div>
+            <div class="meta-row">
+              <span>r/${wp.subreddit}</span>
+              <span>👍 ${wp.upvotes}</span>
+            </div>
+            <div class="card-actions">${controlsHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPending() {
+      const grid = document.getElementById('grid-pending');
+      document.getElementById('pending-count').textContent = `${pendingData.length} wallpaper${pendingData.length !== 1 ? 's' : ''} pending review`;
+      if (pendingData.length === 0) {
+        grid.innerHTML = `<div class="empty-state">No pending wallpapers. Run pipeline.py to fetch new ones.</div>`;
+      } else {
+        grid.innerHTML = pendingData.map(wp => buildCardHtml(wp, 'pending')).join('');
+      }
+    }
+
+    function renderLibrary() {
+      const grid = document.getElementById('grid-library');
+      const searchQ = document.getElementById('lib-search').value.toLowerCase();
+      const filterCat = document.getElementById('lib-category-filter').value;
+
+      const filtered = libraryData.filter(wp => {
+        const titleMatch = wp.title.toLowerCase().includes(searchQ);
+        const catMatch = filterCat === 'All' || wp.category === filterCat;
+        return titleMatch && catMatch;
+      });
+
+      document.getElementById('library-count').textContent = `${filtered.length} wallpaper${filtered.length !== 1 ? 's' : ''} in library`;
+      
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state">No wallpapers match your filters.</div>`;
+      } else {
+        grid.innerHTML = filtered.map(wp => buildCardHtml(wp, 'library')).join('');
+      }
+    }
+
+    /* ACTION HANDLERS */
+    function gatherFields(id, mode) {
+      const title = document.getElementById(`title-${mode}-${id}`).value.trim();
+      const category = document.getElementById(`cat-${mode}-${id}`).value;
+      const tags = document.getElementById(`tags-${mode}-${id}`).value.split(',').map(t => t.trim()).filter(Boolean);
+      return { title, category, tags };
+    }
+
+    async function handlePendingAction(id, action) {
+      const payload = action === 'approve' ? gatherFields(id, 'pending') : {};
+      try {
+        const res = await fetch(`/api/${action}/${id}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          if(action === 'approve') {
+             // To immediately display in library without full fetch, optionally push it. Let's refetch silently.
+             fetchLibrary(); 
+          }
+          pendingData = pendingData.filter(w => w.id !== id);
+          animateRemoval(`card-${id}`, renderPending);
+          showToast(action === 'approve' ? 'Approved!' : 'Rejected', action === 'approve' ? 'var(--success)' : 'var(--danger)');
+        }
+      } catch (err) { showToast('Error executing action', 'var(--danger)'); }
+    }
+
+    async function removeWallpaper(id) {
+      if (!confirm('Remove this wallpaper?')) return;
+      try {
+        const testRes = await fetch('/api/test', {method: 'POST'});
+        console.log('Test status:', testRes.status);
+        
+        const res = await fetch('/api/delete/' + id, {method: 'POST'});
+        console.log('Status:', res.status);
+        if (res.ok) {
+          const card = document.getElementById('card-' + id);
+          if (card) {
+            card.style.transition = 'all 0.3s';
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 300);
+          }
+          // Also remove from array so it doesn't reappear on search redraw
+          libraryData = libraryData.filter(w => String(w.id) !== String(id));
+        }
+      } catch(e) {
+        console.error('Error:', e);
+      }
+    }
+
+    async function handleLibraryAction(id, action) {
+      const payload = gatherFields(id, 'library');
+      try {
+        const res = await fetch(`/api/${action}/${id}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          showToast('Saved successfully!', 'var(--accent-blue)');
+          // Update local state smoothly
+          const wp = libraryData.find(w => String(w.id) === String(id));
+          if (wp) {
+            wp.title = payload.title; wp.category = payload.category; wp.tags = payload.tags;
+          }
+        } else {
+          showToast('Failed: Not Found or Error', 'var(--danger)');
+        }
+      } catch (err) { showToast('Error executing action', 'var(--danger)'); }
+    }
+
+    async function bulkAction(action) {
+      if (pendingData.length === 0 || !confirm(`Sure you want to ${action.toUpperCase()} ALL pending?`)) return;
+      try {
+        const res = await fetch(`/api/${action}-all`, { method: 'POST' });
+        if (res.ok) {
+          const result = await res.json();
+          pendingData = []; renderPending(); fetchLibrary();
+          showToast(`${action === 'approve' ? 'Approved' : 'Rejected'} ${result.count}`, action === 'approve' ? 'var(--success)' : 'var(--danger)');
+        }
+      } catch (err) { showToast('Bulk failed', 'var(--danger)'); }
+    }
+
+    function animateRemoval(elementId, callback) {
+      const el = document.getElementById(elementId);
+      if(!el) { callback(); return; }
+      el.classList.add('removing');
+      setTimeout(callback, 400);
+    }
+
+    /* LIGHTBOX LOGIC */
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbTitle = document.getElementById('lightbox-title');
+    const lbTags = document.getElementById('lightbox-tags');
+    
+    window.openLightbox = function(mode, id) {
+      const list = mode === 'pending' ? pendingData : libraryData;
+      const w = list.find(x => String(x.id) === String(id));
+      if(!w) return;
+      
+      lbImg.src = w.image_url;
+      lbTitle.textContent = w.title;
+      lbTags.innerHTML = (w.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    document.getElementById('lightbox-close').addEventListener('click', closeAdminLightbox);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeAdminLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('active')) closeAdminLightbox(); });
+
+    function closeAdminLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+      setTimeout(() => lbImg.src = '', 300);
+    }
+  </script>
+</body>
+</html>

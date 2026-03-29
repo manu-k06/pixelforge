@@ -10,6 +10,8 @@ import time
 import uuid
 import base64
 import requests
+from io import BytesIO
+from PIL import Image
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -20,6 +22,7 @@ GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:g
 
 HEADERS = {"User-Agent": "PixelForge/1.0"}
 DATA_FILE = os.path.join(os.path.dirname(__file__), "wallpapers.json")
+PENDING_FILE = os.path.join(os.path.dirname(__file__), "pending.json")
 
 SUBREDDITS = [
     "wallpapers",
@@ -36,7 +39,9 @@ PROMPT = (
     "sci-fi, cyberpunk, fantasy, abstract art, AI generated, "
     "beautiful landscapes, minimal art. "
     "Reject if: plain boring photo, meme, text overlays, "
-    "low resolution, unappealing. "
+    "low resolution, unappealing, square format, "
+    "non-standard aspect ratio, not suitable as a "
+    "desktop or mobile wallpaper. "
     "Reply JSON only, no markdown:\n"
     "{\n"
     '  "approved": true or false,\n'
@@ -55,16 +60,17 @@ def is_direct_image(url: str) -> bool:
     return any(lower.endswith(ext) for ext in IMAGE_EXTENSIONS)
 
 
-def load_existing() -> list[dict]:
+def load_json_file(filepath: str) -> list[dict]:
     try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 
-def save_data(data: list[dict]):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+def save_json_file(filepath: str, data: list[dict]):
+    # We write directly here; for app.py we will use atomic os.replace
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
@@ -73,6 +79,31 @@ def judge_image(image_url: str) -> dict | None:
         img_data = requests.get(image_url, headers=HEADERS, timeout=20).content
     except Exception as e:
         print(f"  ✗ Failed to download image: {e}")
+        return None
+        
+    try:
+        img = Image.open(BytesIO(img_data))
+        width, height = img.size
+        
+        if height == 0:
+            return None
+            
+        ratio = width / height
+        if 0.7 <= ratio <= 1.6:
+            print(f"  ⊘ Skipping square/non-standard: {ratio:.2f}")
+            return None
+            
+        orientation = "mobile" if height > width else "desktop"
+        
+        max_dim = max(width, height)
+        if max_dim <= 1920:
+            resolution = "1080p"
+        elif max_dim <= 2560:
+            resolution = "1440p"
+        else:
+            resolution = "4K"
+    except Exception as e:
+        print(f"  ✗ Failed to process image with PIL: {e}")
         return None
 
     # Determine mime type from URL
@@ -106,7 +137,11 @@ def judge_image(image_url: str) -> dict | None:
             text = re.sub(r"^```(?:json)?\s*", "", text)
             text = re.sub(r"\s*```$", "", text)
             result = json.loads(text)
-            return result if result.get("approved") else None
+            if result.get("approved"):
+                result["orientation"] = orientation
+                result["resolution"] = resolution
+                return result
+            return None
         except requests.exceptions.HTTPError as e:
             print(f"  ✗ HTTP Error: {e}")
             return None
@@ -127,8 +162,10 @@ def fetch_subreddit(subreddit: str) -> list[dict]:
 
 
 def run_pipeline():
-    existing = load_existing()
-    existing_urls = {w["image_url"] for w in existing}
+    existing_wallpapers = load_json_file(DATA_FILE)
+    existing_pending = load_json_file(PENDING_FILE)
+    existing_urls = {w["image_url"] for w in existing_wallpapers + existing_pending}
+
     new_wallpapers = []
     total_judged: int = 0
     total_approved: int = 0
@@ -171,6 +208,7 @@ def run_pipeline():
                 "id": str(uuid.uuid4())[:8],  # type: ignore
                 "title": judgement.get("title", data.get("title", "Untitled")),
                 "image_url": image_url,
+                "orientation": judgement.get("orientation", "desktop"),
                 "tags": judgement.get("tags", []),
                 "category": judgement.get("category", "Abstract"),
                 "subreddit": sub,
@@ -182,11 +220,11 @@ def run_pipeline():
             existing_urls.add(image_url)
             print(f"Result: approved")
 
-    all_wallpapers = existing + new_wallpapers
-    save_data(all_wallpapers)
+    all_pending = existing_pending + new_wallpapers
+    save_json_file(PENDING_FILE, all_pending)
 
-    print(f"Done! Added {len(new_wallpapers)} new wallpapers to library")
-    print(f"Total wallpapers in library: {len(all_wallpapers)}")
+    print(f"Done! Saved {len(new_wallpapers)} wallpapers to pending.json for review")
+    print(f"Total wallpapers pending review: {len(all_pending)}")
 
 
 if __name__ == "__main__":

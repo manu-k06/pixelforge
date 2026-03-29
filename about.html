@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About — PixelForge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #080808;
+        --card-bg: rgba(255,255,255,0.03);
+        --border: rgba(255,255,255,0.06);
+        --accent: #f97316;
+        --text: #e2e8f0;
+        --text-muted: #94a3b8;
+      }
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Cabinet Grotesk', system-ui, sans-serif;
+        background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+        overflow-x: hidden; line-height: 1.5;
+        animation: fadeIn 0.4s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      h1, h2, h3, h4 { font-family: 'Bebas Neue', cursive; letter-spacing: 2px; }
+      
+      .grain {
+        position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: .035;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      }
+      
+      .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+      
+      .hero {
+         text-align: center; margin-bottom: 40px;
+         background: radial-gradient(circle at center 20%, rgba(249,115,22,0.1) 0%, transparent 60%);
+      }
+      .hero h1 { font-size: clamp(3.5rem, 8vw, 5rem); color: #fff; margin-bottom: 8px; line-height: 1; text-shadow: 0 0 60px rgba(249,115,22,0.2);}
+      .hero p { font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; font-weight: 500; letter-spacing: 2px;}
+      
+      .section { margin-bottom: 40px; }
+      .section-title { font-size: 2rem; margin-bottom: 16px; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+      
+      .text-content { font-size: 1.1rem; color: var(--text-muted); }
+      .text-highlight { color: var(--accent); font-weight: 700; }
+      
+      /* Glassmorphism Cards */
+      .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; }
+      .card {
+        background: var(--card-bg); border: 1px solid var(--border);
+        padding: 24px; border-radius: 12px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.3s, border-color 0.3s;
+      }
+      .card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+      .card h3 { font-size: 1.5rem; margin-bottom: 8px; color: #fff; }
+      .card p { color: var(--text-muted); font-size: 0.95rem; }
+      .step-num { color: var(--accent); font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+      
+      /* Stats */
+      .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center; }
+      .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+      .stat-num { font-size: 3.5rem; color: var(--accent); font-family: 'Bebas Neue', cursive; line-height: 1; text-shadow: 0 0 20px rgba(249,115,22,0.3); }
+      .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 8px; }
+      
+      /* Categories pill */
+      .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .cat-pill {
+        padding: 6px 16px; border-radius: 100px; border: 1px solid var(--border);
+        background: transparent; color: var(--text); font-weight: 600; text-decoration: none; 
+        font-size: 0.85rem; transition: 0.2s;
+      }
+      .cat-pill:hover { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 15px rgba(249,115,22,0.3); }
+      
+      .builder-card { text-align: center; padding: 24px; max-width: 100%; }
+      .builder-card p { font-size: 1.1rem; margin-bottom: 16px; }
+      .github-link {
+        display: inline-block; padding: 8px 24px; border-radius: 100px;
+        background: #fff; color: #000; text-decoration: none; font-weight: 700;
+        font-size: 0.9rem; transition: opacity 0.3s;
+      }
+      .github-link:hover { opacity: 0.8; }
+      
+      footer { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 20px; }
+      footer a { color: var(--text-muted); text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; margin-top: 8px; display: inline-block;}
+      footer a:hover { color: var(--text); }
+      
+      .nav { position: absolute; top: 24px; left: 24px; z-index: 100; }
+      .nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
+      .nav a:hover { color: #fff; }
+    </style>
+</head>
+<body>
+  <div class="grain"></div>
+  
+  <div class="nav">
+    <a href="/">← Back to Home</a>
+  </div>
+  
+  <main class="container">
+    <header class="hero">
+      <h1>ABOUT PIXELFORGE</h1>
+      <p>Curated by AI. Built for your screen.</p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
+      
+      <!-- What we are -->
+      <section class="section" style="margin-bottom: 0;">
+        <h2 class="section-title">Built Different</h2>
+        <p class="text-content">
+          PixelForge is an AI-curated platform that automatically discovers and filters the finest wallpapers from across the internet. <br><br>
+          Every image runs through a rigorous AI pipeline judging quality, composition, and aesthetic appeal. We are currently <span class="text-highlight">serving curated wallpapers across 9 categories</span>, updated automatically via our python extraction tasks.
+        </p>
+      </section>
+      
+      <!-- How it Works -->
+      <section class="section" style="margin-bottom: 0;">
+        <h2 class="section-title">How It Works</h2>
+        <div class="grid-3">
+          <div class="card">
+            <span class="step-num">Step 1</span>
+            <h3>Discover</h3>
+            <p>Our autonomous python scripts tirelessly scan thousands of images daily from the most prominent design subreddits across the entire internet.</p>
+          </div>
+          <div class="card">
+            <span class="step-num">Step 2</span>
+            <h3>Filter</h3>
+            <p>Our integrated AI heuristics forcefully judge every scraped image for exact lighting, resolution ratio compliance, and overwhelming aesthetic impact.</p>
+          </div>
+          <div class="card">
+            <span class="step-num">Step 3</span>
+            <h3>Curate</h3>
+            <p>Only the absolute finest, distraction-free visual wallpapers survive the pipeline and make it to the permanent live PixelForge library.</p>
+          </div>
+        </div>
+      </section>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+        <!-- Categories -->
+        <section class="section" style="margin-bottom: 0;">
+          <h2 class="section-title">Explore Categories</h2>
+          <div class="cat-grid">
+            <a href="/?cat=Anime" class="cat-pill">Anime</a>
+            <a href="/?cat=Dark" class="cat-pill">Dark</a>
+            <a href="/?cat=Sci-Fi" class="cat-pill">Sci-Fi</a>
+            <a href="/?cat=Nature" class="cat-pill">Nature</a>
+            <a href="/?cat=Abstract" class="cat-pill">Abstract</a>
+            <a href="/?cat=Cyberpunk" class="cat-pill">Cyberpunk</a>
+            <a href="/?cat=Minimal" class="cat-pill">Minimal</a>
+            <a href="/?cat=Fantasy" class="cat-pill">Fantasy</a>
+            <a href="/?cat=AI Art" class="cat-pill">AI Art</a>
+          </div>
+        </section>
+        
+        <!-- Built By -->
+        <section class="section" style="margin-bottom: 0;">
+          <h2 class="section-title">The Builder</h2>
+          <div class="card builder-card">
+            <p class="text-content">PixelForge is a passion project by <span style="color:#fff; font-weight:700;">Manu K Rajan</span>.</p>
+            <a href="https://github.com/manu-k06" target="_blank" class="github-link">github.com/manu-k06</a>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+  
+  <footer>
+    PixelForge © 2026 — AI Curated Wallpapers<br>
+    <a href="/">Back to Home</a>
+  </footer>
+</body>
+</html>

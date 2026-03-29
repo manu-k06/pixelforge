@@ -1,5 +1,337 @@
 [
   {
+    "id": "50481aca",
+    "title": "Cosmic Anime Crew",
+    "image_url": "https://i.redd.it/aefkltnl3ipg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "anime",
+      "sci-fi",
+      "space",
+      "characters"
+    ],
+    "category": "Anime",
+    "subreddit": "wallpapers",
+    "upvotes": 78,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rvroo5/interstella_5555_the_crescendolls_1920x1080/",
+    "added_at": "2026-03-29T12:11:12.037347+00:00",
+    "resolution": "1080p"
+  },
+  {
+    "id": "6466865e",
+    "title": "Cosmic Ring Gate",
+    "image_url": "https://i.redd.it/y5zgzr2zvcog1.png",
+    "orientation": "mobile",
+    "tags": [
+      "sci-fi",
+      "space",
+      "dark",
+      "abstract",
+      "cosmic"
+    ],
+    "category": "Sci-Fi",
+    "subreddit": "Amoledbackgrounds",
+    "upvotes": 259,
+    "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rqlq3f/interstellar_1540x3000/",
+    "added_at": "2026-03-29T12:19:47.840011+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "c84642c5",
+    "title": "Lonely Anime Cat",
+    "image_url": "https://i.redd.it/6lcp40g2m8mg1.png",
+    "orientation": "mobile",
+    "tags": [
+      "anime",
+      "cat",
+      "minimal",
+      "dark"
+    ],
+    "category": "Anime",
+    "subreddit": "Amoledbackgrounds",
+    "upvotes": 267,
+    "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rh2n99/cat_1140x2471/",
+    "added_at": "2026-03-29T12:18:30.377477+00:00",
+    "resolution": "1440p"
+  },
+  {
+    "id": "f7874fdc",
+    "title": "Desert Worm Encounter",
+    "image_url": "https://i.redd.it/n81aptfz22pg1.png",
+    "orientation": "mobile",
+    "tags": [
+      "sci-fi",
+      "dune",
+      "sandworm",
+      "desert",
+      "dark",
+      "moody",
+      "creature",
+      "fantasy",
+      "illustration"
+    ],
+    "category": "Sci-Fi",
+    "subreddit": "Amoledbackgrounds",
+    "upvotes": 288,
+    "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rtraag/shaihulud_by_henry_daubrez_1152x2048/",
+    "added_at": "2026-03-29T12:17:12.977366+00:00",
+    "resolution": "1440p"
+  },
+  {
+    "id": "24bea2cc",
+    "title": "Cosmic Dark Hole",
+    "image_url": "https://i.redd.it/673i2ipis7qg1.jpeg",
+    "orientation": "mobile",
+    "tags": [
+      "Dark",
+      "Sci-Fi",
+      "Space",
+      "Minimal",
+      "Black Hole"
+    ],
+    "category": "Sci-Fi",
+    "subreddit": "Amoledbackgrounds",
+    "upvotes": 425,
+    "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1ryykk2/blackhole_1472x2616/",
+    "added_at": "2026-03-29T12:16:09.177172+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "2d4ac7f3",
+    "title": "Red Bull Racer",
+    "image_url": "https://i.redd.it/j2wiyyn3jvng1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "Racing",
+      "Formula 1",
+      "Automotive",
+      "Sports Car",
+      "Moody"
+    ],
+    "category": "Dark",
+    "subreddit": "wallpapers",
+    "upvotes": 68,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1roe708/oc_i_finally_built_a_general_wallpaper_site_after/",
+    "added_at": "2026-03-29T12:12:47.950249+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "9ce32ca7",
+    "title": "Golden Hour Seascape",
+    "image_url": "https://i.redd.it/7zpctini58pg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "sunset",
+      "ocean",
+      "landscape"
+    ],
+    "category": "Nature",
+    "subreddit": "wallpapers",
+    "upvotes": 59,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rugfxk/3840_x_2160_waves_rolling_into_a_peaceful_sunset/",
+    "added_at": "2026-03-29T10:38:38.711190+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "5a829241",
+    "title": "Vibrant Splash Art",
+    "image_url": "https://i.redd.it/doe1sfn39opg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "Illustration",
+      "Splash",
+      "Drink",
+      "Colorful"
+    ],
+    "category": "Abstract",
+    "subreddit": "wallpapers",
+    "upvotes": 65,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rwjpyc/dropped_iced_tea_by_bern_foster_5120x2880/",
+    "added_at": "2026-03-29T10:38:14.287837+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "2ce4cf00",
+    "title": "Pink Sky Coastal Drive",
+    "image_url": "https://i.redd.it/zwqxnm4q64mg1.png",
+    "orientation": "desktop",
+    "tags": [
+      "landscape",
+      "minimal art",
+      "vibrant"
+    ],
+    "category": "Minimal",
+    "subreddit": "wallpapers",
+    "upvotes": 77,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rgl7o0/bronze_aquarium_cover_art_by_hiroshi_nagai/",
+    "added_at": "2026-03-29T10:35:26.871629+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "40bb4191",
+    "title": "Snowy Cabin Radiance",
+    "image_url": "https://i.redd.it/6hihq4ilk7ng1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "Winter",
+      "Mountains",
+      "AI Art"
+    ],
+    "category": "Nature",
+    "subreddit": "wallpapers",
+    "upvotes": 100,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rleqts/3840_x_2160_morning_sunlight_over_a_snowy_alpine/",
+    "added_at": "2026-03-29T10:34:35.122148+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "f888a334",
+    "title": "Vibrant Seasons Tree",
+    "image_url": "https://i.redd.it/00shzapysjmg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "abstract",
+      "fantasy",
+      "nature",
+      "impasto"
+    ],
+    "category": "Abstract",
+    "subreddit": "wallpapers",
+    "upvotes": 123,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rihjc1/3240x2160_winter_fades_and_spring_arrives/",
+    "added_at": "2026-03-29T10:34:05.956106+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "b2add8bf",
+    "title": "Twilight Urban Flow",
+    "image_url": "https://i.redd.it/5hdyi18mthng1.png",
+    "orientation": "desktop",
+    "tags": [
+      "cityscape",
+      "night",
+      "dusk",
+      "moody"
+    ],
+    "category": "Dark",
+    "subreddit": "wallpapers",
+    "upvotes": 130,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rmqvg2/from_east_river_greenway_new_york_by_matsefcik/",
+    "added_at": "2026-03-29T10:33:30.184991+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "1ab03747",
+    "title": "Vibrant Lake Reflections",
+    "image_url": "https://i.redd.it/6wdgkpbiknmg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "Nature",
+      "Mountains",
+      "Sunset",
+      "Reflection"
+    ],
+    "category": "Nature",
+    "subreddit": "wallpapers",
+    "upvotes": 128,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1riwaq8/3840_x_2160_when_the_mountains_glow_like_embers/",
+    "added_at": "2026-03-29T10:32:30.383345+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "1adf5cc2",
+    "title": "Tropical Night Vista",
+    "image_url": "https://i.redd.it/74rgpz6f5pog1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "tropical",
+      "jungle",
+      "beach",
+      "stylized art",
+      "night",
+      "dark foliage"
+    ],
+    "category": "Dark",
+    "subreddit": "wallpapers",
+    "upvotes": 150,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rs6lpy/coastline_at_lovers_point_iii_1993_by_hiroshi/",
+    "added_at": "2026-03-29T10:32:07.304440+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "7638c975",
+    "title": "Crimson Moon Temple",
+    "image_url": "https://i.redd.it/x8zufdgwf0ng1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "anime",
+      "cyberpunk",
+      "fantasy",
+      "moody",
+      "night",
+      "ai art"
+    ],
+    "category": "Cyberpunk",
+    "subreddit": "wallpapers",
+    "upvotes": 151,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rkil4j/3840_x_2160_neon_moon_over_a_silent_shore/",
+    "added_at": "2026-03-29T10:31:17.536157+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "d635bd90",
+    "title": "Four Seasons Stream",
+    "image_url": "https://i.redd.it/kida74kqqwmg1.jpeg",
+    "orientation": "desktop",
+    "tags": [
+      "Landscape",
+      "Japanese Art",
+      "Fantasy"
+    ],
+    "category": "AI Art",
+    "subreddit": "wallpapers",
+    "upvotes": 180,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rk4105/four_seasons_landscape_transition_in_cloisonné/",
+    "added_at": "2026-03-29T10:30:53.761507+00:00",
+    "resolution": "4K"
+  },
+  {
+    "id": "937c8f94",
+    "title": "Tokyo Layered Trains",
+    "image_url": "https://i.redd.it/nhnj12vqtong1.png",
+    "orientation": "desktop",
+    "tags": [
+      "Tokyo",
+      "trains",
+      "cityscape",
+      "Japan",
+      "urban"
+    ],
+    "category": "Nature",
+    "subreddit": "wallpapers",
+    "upvotes": 339,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/1rnlca9/three_railways_one_shot_in_ochanomizu_station/",
+    "added_at": "2026-03-29T10:30:17.524459+00:00",
+    "resolution": "1440p"
+  },
+  {
+    "id": "mock_id1",
+    "title": "Cyber City Updated",
+    "image_url": "https://images.unsplash.com/photo-1542451313056-b7c8e626645f",
+    "tags": [
+      "neon",
+      "city",
+      "night"
+    ],
+    "category": "Cyberpunk",
+    "subreddit": "wallpapers",
+    "upvotes": 420,
+    "reddit_url": "https://reddit.com/r/wallpapers/comments/12345/neon_dreams",
+    "added_at": "2026-03-29T10:00:00.000000+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
+  },
+  {
     "id": "674d7b86",
     "title": "peacock with cherry blossom [3840x2160]",
     "image_url": "https://i.redd.it/uxpgafadxoqg1.jpeg",
@@ -13,7 +345,9 @@
     "subreddit": "wallpapers",
     "upvotes": 91,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s12gi0/peacock_with_cherry_blossom_3840x2160/",
-    "added_at": "2026-03-28T15:47:12.944152+00:00"
+    "added_at": "2026-03-28T15:47:12.944152+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "83064b98",
@@ -29,7 +363,9 @@
     "subreddit": "wallpapers",
     "upvotes": 72,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s1vyos/under_the_stars_1920x1080/",
-    "added_at": "2026-03-28T15:47:12.944290+00:00"
+    "added_at": "2026-03-28T15:47:12.944290+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "3c89c4bb",
@@ -45,7 +381,9 @@
     "subreddit": "wallpapers",
     "upvotes": 69,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s0260q/space_shuttle_atlantis_final_landing_1920x1080/",
-    "added_at": "2026-03-28T15:47:12.944325+00:00"
+    "added_at": "2026-03-28T15:47:12.944325+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "439634f9",
@@ -61,7 +399,9 @@
     "subreddit": "wallpapers",
     "upvotes": 64,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s3ka3m/arecibo_radio_observatory_september_2018_1920x1080/",
-    "added_at": "2026-03-28T15:47:12.944453+00:00"
+    "added_at": "2026-03-28T15:47:12.944453+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "24471885",
@@ -77,7 +417,9 @@
     "subreddit": "wallpapers",
     "upvotes": 60,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s374fb/3840x2160_astronaut/",
-    "added_at": "2026-03-28T15:47:12.944820+00:00"
+    "added_at": "2026-03-28T15:47:12.944820+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "c8c226cc",
@@ -93,23 +435,9 @@
     "subreddit": "wallpapers",
     "upvotes": 53,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s4jpyg/b1_lancer_afterburner_takeoff_mcconnell_afb_ks/",
-    "added_at": "2026-03-28T15:47:12.944942+00:00"
-  },
-  {
-    "id": "a9b3627c",
-    "title": "[4000 × 3000px] PEACE",
-    "image_url": "https://i.redd.it/1nrvcyndzcrg1.jpeg",
-    "tags": [
-      "desktop",
-      "hd",
-      "aesthetic",
-      "sci-fi"
-    ],
-    "category": "Sci-Fi",
-    "subreddit": "wallpapers",
-    "upvotes": 42,
-    "reddit_url": "https://reddit.com/r/wallpapers/comments/1s42q5y/4000_3000px_peace/",
-    "added_at": "2026-03-28T15:47:12.944993+00:00"
+    "added_at": "2026-03-28T15:47:12.944942+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "505c5398",
@@ -125,23 +453,9 @@
     "subreddit": "wallpapers",
     "upvotes": 35,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s2jysq/winter_lights_by_andreas_rocha/",
-    "added_at": "2026-03-28T15:47:12.945029+00:00"
-  },
-  {
-    "id": "26122cb7",
-    "title": "After all these years, I keep coming back to this [4K]",
-    "image_url": "https://i.redd.it/7mp11f3rg1rg1.jpeg",
-    "tags": [
-      "desktop",
-      "hd",
-      "aesthetic",
-      "abstract"
-    ],
-    "category": "Abstract",
-    "subreddit": "wallpapers",
-    "upvotes": 32,
-    "reddit_url": "https://reddit.com/r/wallpapers/comments/1s2mmlu/after_all_these_years_i_keep_coming_back_to_this/",
-    "added_at": "2026-03-28T15:47:12.945208+00:00"
+    "added_at": "2026-03-28T15:47:12.945029+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "a86a6ad9",
@@ -157,7 +471,9 @@
     "subreddit": "wallpapers",
     "upvotes": 33,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s041vz/miku_teto/",
-    "added_at": "2026-03-28T15:47:12.945258+00:00"
+    "added_at": "2026-03-28T15:47:12.945258+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "75f24b9b",
@@ -173,7 +489,9 @@
     "subreddit": "wallpapers",
     "upvotes": 25,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s3ip9e/oc_green_fields_4k_still_link_to_the_live/",
-    "added_at": "2026-03-28T15:47:12.945280+00:00"
+    "added_at": "2026-03-28T15:47:12.945280+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "c9e61242",
@@ -189,7 +507,9 @@
     "subreddit": "wallpapers",
     "upvotes": 21,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s4iszp/3840_2160px_dark_wallpepar/",
-    "added_at": "2026-03-28T15:47:12.945313+00:00"
+    "added_at": "2026-03-28T15:47:12.945313+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "cdf08a36",
@@ -205,7 +525,9 @@
     "subreddit": "wallpapers",
     "upvotes": 20,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s5drtc/purple_after_dark_mobius_loop_twist_3840x2160/",
-    "added_at": "2026-03-28T15:47:12.945332+00:00"
+    "added_at": "2026-03-28T15:47:12.945332+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "353f32d5",
@@ -221,7 +543,9 @@
     "subreddit": "wallpapers",
     "upvotes": 17,
     "reddit_url": "https://reddit.com/r/wallpapers/comments/1s2k7q1/a_slice_of_the_universe_1920x1080/",
-    "added_at": "2026-03-28T15:47:12.945351+00:00"
+    "added_at": "2026-03-28T15:47:12.945351+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "9b79d58f",
@@ -237,7 +561,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 242,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rzzdr5/project_hail_mary_2765x6144/",
-    "added_at": "2026-03-28T15:47:14.157956+00:00"
+    "added_at": "2026-03-28T15:47:14.157956+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "055c4637",
@@ -253,7 +579,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 241,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s0kljc/faded_dusk_2304x4096/",
-    "added_at": "2026-03-28T15:47:14.158002+00:00"
+    "added_at": "2026-03-28T15:47:14.158002+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "6d847f73",
@@ -269,7 +597,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 229,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s36a31/its_just_a_headache_by_sarah_mason_1000x1720/",
-    "added_at": "2026-03-28T15:47:14.158018+00:00"
+    "added_at": "2026-03-28T15:47:14.158018+00:00",
+    "orientation": "mobile",
+    "resolution": "1080p"
   },
   {
     "id": "4524c2ef",
@@ -285,23 +615,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 215,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s54oqy/tokyo_nights_by_derech_1365x2048/",
-    "added_at": "2026-03-28T15:47:14.158031+00:00"
-  },
-  {
-    "id": "f52d346b",
-    "title": "The Last Days of Pompeii [962x1218]",
-    "image_url": "https://i.redd.it/e5ysxqn3o4rg1.png",
-    "tags": [
-      "amoled",
-      "dark",
-      "oled",
-      "dark"
-    ],
-    "category": "Dark",
-    "subreddit": "Amoledbackgrounds",
-    "upvotes": 194,
-    "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s324q0/the_last_days_of_pompeii_962x1218/",
-    "added_at": "2026-03-28T15:47:14.158043+00:00"
+    "added_at": "2026-03-28T15:47:14.158031+00:00",
+    "orientation": "mobile",
+    "resolution": "1440p"
   },
   {
     "id": "7f0d39fb",
@@ -317,7 +633,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 141,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rzzu9m/project_hail_mary_2782x5255/",
-    "added_at": "2026-03-28T15:47:14.158055+00:00"
+    "added_at": "2026-03-28T15:47:14.158055+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "c0d10a7f",
@@ -333,7 +651,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 134,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s423ug/king_of_monsters_by_pascal_blanché_1134x2520/",
-    "added_at": "2026-03-28T15:47:14.158068+00:00"
+    "added_at": "2026-03-28T15:47:14.158068+00:00",
+    "orientation": "mobile",
+    "resolution": "1440p"
   },
   {
     "id": "1f7096ce",
@@ -349,7 +669,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 127,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s2jcdc/exit_8_official_movie_poster_1300x3000/",
-    "added_at": "2026-03-28T15:47:14.158082+00:00"
+    "added_at": "2026-03-28T15:47:14.158082+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "b5c7bb03",
@@ -365,7 +687,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 117,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s38z0h/the_red_warrior_by_pascal_blanché_1541x3424/",
-    "added_at": "2026-03-28T15:47:14.158094+00:00"
+    "added_at": "2026-03-28T15:47:14.158094+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "0a0acaf8",
@@ -381,7 +705,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 112,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s4m9vn/flower_under_uv_1144x2288/",
-    "added_at": "2026-03-28T15:47:14.158105+00:00"
+    "added_at": "2026-03-28T15:47:14.158105+00:00",
+    "orientation": "mobile",
+    "resolution": "1440p"
   },
   {
     "id": "36223430",
@@ -397,7 +723,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 112,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s45g83/the_thing_artwork_by_chris_thornley_raid71/",
-    "added_at": "2026-03-28T15:47:14.158117+00:00"
+    "added_at": "2026-03-28T15:47:14.158117+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "6aead85e",
@@ -413,7 +741,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 103,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s3hhft/abstract_liquid_planet_1740x4000/",
-    "added_at": "2026-03-28T15:47:14.158129+00:00"
+    "added_at": "2026-03-28T15:47:14.158129+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "e351f636",
@@ -429,7 +759,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 100,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s2frvd/gradient_wallpaper_736x1635/",
-    "added_at": "2026-03-28T15:47:14.158146+00:00"
+    "added_at": "2026-03-28T15:47:14.158146+00:00",
+    "orientation": "mobile",
+    "resolution": "1080p"
   },
   {
     "id": "cfa24558",
@@ -445,7 +777,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 96,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1s1hvgk/wavy_lines_1080x1920/",
-    "added_at": "2026-03-28T15:47:14.158158+00:00"
+    "added_at": "2026-03-28T15:47:14.158158+00:00",
+    "orientation": "mobile",
+    "resolution": "1080p"
   },
   {
     "id": "582ca17d",
@@ -461,23 +795,9 @@
     "subreddit": "Amoledbackgrounds",
     "upvotes": 82,
     "reddit_url": "https://reddit.com/r/Amoledbackgrounds/comments/1rzyejp/dandelion_on_fire_1740x4000/",
-    "added_at": "2026-03-28T15:47:14.158170+00:00"
-  },
-  {
-    "id": "4b332ec7",
-    "title": "Temple Entrance (OC)",
-    "image_url": "https://i.redd.it/poks3rbeckqg1.png",
-    "tags": [
-      "landscape",
-      "fantasy",
-      "art",
-      "fantasy"
-    ],
-    "category": "Fantasy",
-    "subreddit": "ImaginaryLandscapes",
-    "upvotes": 776,
-    "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s0h02p/temple_entrance_oc/",
-    "added_at": "2026-03-28T15:47:15.383361+00:00"
+    "added_at": "2026-03-28T15:47:14.158170+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "0de94b4b",
@@ -493,39 +813,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 562,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s58n5c/the_trial_by_jonas_hassibi/",
-    "added_at": "2026-03-28T15:47:15.383397+00:00"
-  },
-  {
-    "id": "cea7df65",
-    "title": "Iz'Kal Desert City by James Combridge",
-    "image_url": "https://i.redd.it/09jxzwkr4grg1.jpeg",
-    "tags": [
-      "landscape",
-      "fantasy",
-      "art",
-      "sci-fi"
-    ],
-    "category": "Sci-Fi",
-    "subreddit": "ImaginaryLandscapes",
-    "upvotes": 429,
-    "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s4iazb/izkal_desert_city_by_james_combridge/",
-    "added_at": "2026-03-28T15:47:15.383413+00:00"
-  },
-  {
-    "id": "f2899cbd",
-    "title": "cherry blossom cafe by Sin jong hun",
-    "image_url": "https://i.redd.it/g3e4dsaur0rg1.jpeg",
-    "tags": [
-      "landscape",
-      "fantasy",
-      "art",
-      "abstract"
-    ],
-    "category": "Abstract",
-    "subreddit": "ImaginaryLandscapes",
-    "upvotes": 426,
-    "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s2inkm/cherry_blossom_cafe_by_sin_jong_hun/",
-    "added_at": "2026-03-28T15:47:15.383427+00:00"
+    "added_at": "2026-03-28T15:47:15.383397+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "c93a6227",
@@ -541,7 +831,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 353,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s34eao/old_path_by_me/",
-    "added_at": "2026-03-28T15:47:15.383441+00:00"
+    "added_at": "2026-03-28T15:47:15.383441+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "630deab4",
@@ -557,7 +849,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 286,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s174zq/dark_star_oc/",
-    "added_at": "2026-03-28T15:47:15.383454+00:00"
+    "added_at": "2026-03-28T15:47:15.383454+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "91314628",
@@ -573,7 +867,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 275,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s45gya/the_edge_by_adrian_virlan/",
-    "added_at": "2026-03-28T15:47:15.383466+00:00"
+    "added_at": "2026-03-28T15:47:15.383466+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "dd93d379",
@@ -589,7 +885,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 250,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s35nii/fields_of_heaven_2021_by_me/",
-    "added_at": "2026-03-28T15:47:15.383479+00:00"
+    "added_at": "2026-03-28T15:47:15.383479+00:00",
+    "orientation": "mobile",
+    "resolution": "1080p"
   },
   {
     "id": "a199d74c",
@@ -605,23 +903,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 243,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s1lpdg/waterfalls_by_brandon_liao/",
-    "added_at": "2026-03-28T15:47:15.383492+00:00"
-  },
-  {
-    "id": "385172b6",
-    "title": "The Violet Spectrum a Journey Through Light | by puscas_adryan",
-    "image_url": "https://i.redd.it/bji22kkq08rg1.jpeg",
-    "tags": [
-      "landscape",
-      "fantasy",
-      "art",
-      "nature"
-    ],
-    "category": "Nature",
-    "subreddit": "ImaginaryLandscapes",
-    "upvotes": 216,
-    "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s3g7e3/the_violet_spectrum_a_journey_through_light_by/",
-    "added_at": "2026-03-28T15:47:15.383504+00:00"
+    "added_at": "2026-03-28T15:47:15.383492+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "d03bef98",
@@ -637,7 +921,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 215,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s29l8s/sos_by_rui_contreras/",
-    "added_at": "2026-03-28T15:47:15.383516+00:00"
+    "added_at": "2026-03-28T15:47:15.383516+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "2510b33d",
@@ -653,7 +939,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 211,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1rzvp56/duskkeepbazaar_by_yushua/",
-    "added_at": "2026-03-28T15:47:15.383527+00:00"
+    "added_at": "2026-03-28T15:47:15.383527+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "07e0af22",
@@ -669,7 +957,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 178,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s5wer6/castle_on_the_rock_by_marcin_basta/",
-    "added_at": "2026-03-28T15:47:15.383539+00:00"
+    "added_at": "2026-03-28T15:47:15.383539+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "b74a33df",
@@ -685,7 +975,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 159,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s50iqn/practice_piece_by_jiebin_chen/",
-    "added_at": "2026-03-28T15:47:15.383553+00:00"
+    "added_at": "2026-03-28T15:47:15.383553+00:00",
+    "orientation": "desktop",
+    "resolution": "1080p"
   },
   {
     "id": "633b2723",
@@ -701,7 +993,9 @@
     "subreddit": "ImaginaryLandscapes",
     "upvotes": 146,
     "reddit_url": "https://reddit.com/r/ImaginaryLandscapes/comments/1s1xztu/the_wanderer_and_the_forest_spirit_by_me/",
-    "added_at": "2026-03-28T15:47:15.383564+00:00"
+    "added_at": "2026-03-28T15:47:15.383564+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "a3ef07e7",
@@ -717,7 +1011,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 554,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s12wfz/minah_cosplaying_tharja_original_1125x2000/",
-    "added_at": "2026-03-28T15:47:16.612084+00:00"
+    "added_at": "2026-03-28T15:47:16.612084+00:00",
+    "orientation": "mobile",
+    "resolution": "1440p"
   },
   {
     "id": "823f62db",
@@ -733,23 +1029,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 542,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s3h4sj/frieren_journeys_beyond_end_2304x4096/",
-    "added_at": "2026-03-28T15:47:16.612124+00:00"
-  },
-  {
-    "id": "74362d5b",
-    "title": "Misato Jeans [Neon Genesis Evangelion] (2560x1440)",
-    "image_url": "https://i.redd.it/hf071vb6rerg1.png",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "cyberpunk"
-    ],
-    "category": "Cyberpunk",
-    "subreddit": "animewallpaper",
-    "upvotes": 499,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s4ap99/misato_jeans_neon_genesis_evangelion_2560x1440/",
-    "added_at": "2026-03-28T15:47:16.612140+00:00"
+    "added_at": "2026-03-28T15:47:16.612124+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "c0ef541e",
@@ -765,39 +1047,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 486,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s45ijy/frieren_journeybeyondend_2304x4096/",
-    "added_at": "2026-03-28T15:47:16.612157+00:00"
-  },
-  {
-    "id": "9559aba0",
-    "title": "Hot and Sweaty Summer Pyra [Xenoblade] (1104X2048)",
-    "image_url": "https://i.redd.it/1xzf22baifqg1.jpeg",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "anime"
-    ],
-    "category": "Anime",
-    "subreddit": "animewallpaper",
-    "upvotes": 459,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1rzwiac/hot_and_sweaty_summer_pyra_xenoblade_1104x2048/",
-    "added_at": "2026-03-28T15:47:16.612170+00:00"
-  },
-  {
-    "id": "c3e33f13",
-    "title": "Promeia [Zenless Zone Zero] (900x1600)",
-    "image_url": "https://i.redd.it/1db44072lsqg1.jpeg",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "fantasy"
-    ],
-    "category": "Fantasy",
-    "subreddit": "animewallpaper",
-    "upvotes": 433,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s1g20e/promeia_zenless_zone_zero_900x1600/",
-    "added_at": "2026-03-28T15:47:16.612182+00:00"
+    "added_at": "2026-03-28T15:47:16.612157+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "54222d29",
@@ -813,7 +1065,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 401,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s0ja4v/promeia_zenless_zone_zero_2298x4086/",
-    "added_at": "2026-03-28T15:47:16.612193+00:00"
+    "added_at": "2026-03-28T15:47:16.612193+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "b4b559bf",
@@ -829,7 +1083,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 324,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s0gklt/evanescia_honkai_star_rail_2495x5400/",
-    "added_at": "2026-03-28T15:47:16.612204+00:00"
+    "added_at": "2026-03-28T15:47:16.612204+00:00",
+    "orientation": "mobile",
+    "resolution": "4K"
   },
   {
     "id": "018fdb35",
@@ -845,39 +1101,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 288,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s1wl8y/waves_under_the_moonlight_frieren_beyond_journeys/",
-    "added_at": "2026-03-28T15:47:16.612216+00:00"
-  },
-  {
-    "id": "6fa4fe6a",
-    "title": "Promeia [ZenlessZoneZero] (900x1600)",
-    "image_url": "https://i.redd.it/4p3mdaij6erg1.jpeg",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "fantasy"
-    ],
-    "category": "Fantasy",
-    "subreddit": "animewallpaper",
-    "upvotes": 248,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s47kyq/promeia_zenlesszonezero_900x1600/",
-    "added_at": "2026-03-28T15:47:16.612228+00:00"
-  },
-  {
-    "id": "0da6a866",
-    "title": "Suisei Hoshimachi [Hololive] (2560×4100)",
-    "image_url": "https://i.redd.it/6wah4cbxxmqg1.png",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "cyberpunk"
-    ],
-    "category": "Cyberpunk",
-    "subreddit": "animewallpaper",
-    "upvotes": 246,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s0se5d/suisei_hoshimachi_hololive_25604100/",
-    "added_at": "2026-03-28T15:47:16.612240+00:00"
+    "added_at": "2026-03-28T15:47:16.612216+00:00",
+    "orientation": "desktop",
+    "resolution": "4K"
   },
   {
     "id": "7c8918bb",
@@ -893,39 +1119,9 @@
     "subreddit": "animewallpaper",
     "upvotes": 215,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s5hy95/runaway_emma_pokémon_legends_za_2560x1440/",
-    "added_at": "2026-03-28T15:47:16.612252+00:00"
-  },
-  {
-    "id": "ce98cbd9",
-    "title": "Sweety wants to treat you to something sweet [ZenlessZoneZero] (900x1600)",
-    "image_url": "https://i.redd.it/766zhqt496rg1.jpeg",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "anime"
-    ],
-    "category": "Anime",
-    "subreddit": "animewallpaper",
-    "upvotes": 185,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s37dkn/sweety_wants_to_treat_you_to_something_sweet/",
-    "added_at": "2026-03-28T15:47:16.612263+00:00"
-  },
-  {
-    "id": "7656f5f8",
-    "title": "Mai Shiranui - Firey Pose [The King of Fighters] (3840x2160)",
-    "image_url": "https://i.redd.it/d5ajx1svknqg1.png",
-    "tags": [
-      "anime",
-      "illustration",
-      "art",
-      "fantasy"
-    ],
-    "category": "Fantasy",
-    "subreddit": "animewallpaper",
-    "upvotes": 151,
-    "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1s0vqx8/mai_shiranui_firey_pose_the_king_of_fighters/",
-    "added_at": "2026-03-28T15:47:16.612280+00:00"
+    "added_at": "2026-03-28T15:47:16.612252+00:00",
+    "orientation": "desktop",
+    "resolution": "1440p"
   },
   {
     "id": "8f06674b",
@@ -937,10 +1133,12 @@
       "art",
       "cyberpunk"
     ],
-    "category": "Cyberpunk",
+    "category": "AI Art",
     "subreddit": "animewallpaper",
     "upvotes": 146,
     "reddit_url": "https://reddit.com/r/Animewallpaper/comments/1rzzsm7/soyo_in_the_sun_bang_dream_2500x1273_カノkanon/",
-    "added_at": "2026-03-28T15:47:16.612305+00:00"
+    "added_at": "2026-03-28T15:47:16.612305+00:00",
+    "orientation": "desktop",
+    "resolution": "1440p"
   }
 ]
