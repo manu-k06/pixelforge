@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelForge — AI-Curated Wallpapers</title>
+  <meta name="description" content="PixelForge v2 — Stunning wallpapers curated by AI, sourced from Reddit's finest communities." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syncopate:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+  <style>
+    /* ───── Reset ───── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #080808;
+      --bg-2: #0f0f0f;
+      --card-bg: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --accent: #f97316;
+      --accent-2: #0ea5e9;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --radius: 16px;
+      --transition: .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+
+    /* ───── Spotlight Cursor ───── */
+    #spotlight {
+      position: fixed;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: opacity .3s;
+      will-change: left, top;
+    }
+
+    /* Restore default cursor for interactive elements */
+    a, button, input, [data-tilt] { cursor: pointer; }
+    input { cursor: text; }
+
+    /* ───── Grain Overlay ───── */
+    .grain {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px 128px;
+    }
+
+    /* ───── Hero Section ───── */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-color: #0a0a0a;
+      will-change: transform;
+      transition: background-image 1s ease;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(8,8,8,0.3) 0%,
+        rgba(8,8,8,0.6) 50%,
+        rgba(8,8,8,0.95) 85%,
+        #080808 100%
+      );
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 14vw, 12rem);
+      letter-spacing: 8px;
+      line-height: .9;
+      color: #fff;
+      text-shadow: 0 0 80px rgba(249,115,22,0.15);
+    }
+
+    .hero-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(.85rem, 1.4vw, 1.1rem);
+      font-weight: 300;
+      color: var(--text-muted);
+      margin-top: 16px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .scroll-arrow {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      animation: bounce 2s infinite;
+      opacity: .5;
+    }
+    .scroll-arrow svg { width: 28px; height: 28px; color: var(--text-muted); }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ───── Sticky Bar (Categories + Search) ───── */
+    .sticky-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 8, 8, 0.8);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0 14px;
+    }
+
+    .bar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Syncopate', sans-serif;
+      font-size: .62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(249,115,22,0.25);
+    }
+
+    .search-wrap {
+      position: relative;
+      width: 240px;
+      flex-shrink: 0;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      width: 15px; height: 15px;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      outline: none;
+      transition: border var(--transition), box-shadow var(--transition);
+      backdrop-filter: blur(10px);
+    }
+    #searchInput::placeholder { color: var(--text-muted); }
+    #searchInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+    }
+
+    /* ───── Main ───── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    .count-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: .78rem;
+      color: var(--text-muted);
+    }
+    .count-bar span { color: var(--accent); font-weight: 600; }
+
+    /* ───── Masonry Grid ───── */
+    .masonry {
+      columns: 4;
+      column-gap: 12px;
+    }
+    @media (max-width: 1200px) { .masonry { columns: 3; } }
+    @media (max-width: 768px)  { .masonry { columns: 2; } }
+    @media (max-width: 480px)  { .masonry { columns: 1; } }
+
+    /* ───── Card ───── */
+    .card {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .5s ease, transform .5s ease, box-shadow var(--transition);
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .card:hover {
+      box-shadow: 0 0 30px rgba(249,115,22,0.2);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .card-img-wrap img {
+      width: 100%;
+      display: block;
+      transition: transform .6s ease;
+    }
+    .card:hover .card-img-wrap img {
+      transform: scale(1.04);
+    }
+
+    .card-img-wrap .img-gradient {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to top, rgba(0,0,0,.85), transparent);
+      pointer-events: none;
+    }
+
+    .category-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      color: var(--accent);
+      font-family: 'Syncopate', sans-serif;
+      font-size: .55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border: 1px solid rgba(249,115,22,0.2);
+      z-index: 2;
+    }
+
+    .card-body {
+      padding: 12px 14px 14px;
+      position: relative;
+    }
+
+    .card-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .82rem;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
+    .tag {
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-muted);
+      font-size: .6rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .btn-download {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .btn-download:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(249,115,22,0.3);
+    }
+    .btn-download svg { width: 14px; height: 14px; }
+
+    /* ───── Skeleton ───── */
+    .skeleton {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+    .sk-img {
+      width: 100%;
+      background: linear-gradient(110deg, #111 30%, #1a1a1a 50%, #111 70%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+    .sk-body { padding: 12px 14px 14px; }
+    .sk-line {
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(110deg, #151515 30%, #1e1e1e 50%, #151515 70%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      margin-bottom: 8px;
+    }
+    .sk-line.w70 { width: 70%; }
+    .sk-line.w40 { width: 40%; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ───── States ───── */
+    .state-msg {
+      text-align: center;
+      padding: 100px 24px;
+    }
+    .state-msg .emoji { font-size: 2.5rem; margin-bottom: 14px; }
+    .state-msg h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .state-msg p { color: var(--text-muted); font-size: .85rem; margin-bottom: 20px; }
+    .btn-retry {
+      padding: 10px 28px;
+      border-radius: 100px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-retry:hover { filter: brightness(1.15); box-shadow: 0 0 20px rgba(249,115,22,0.3); }
+
+    /* ───── Footer ───── */
+    footer {
+      text-align: center;
+      padding: 40px 24px 48px;
+      color: var(--text-muted);
+      font-size: .72rem;
+      letter-spacing: 1px;
+      border-top: 1px solid var(--border);
+    }
+    footer span { color: var(--accent); }
+
+    /* ───── Scrollbar ───── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
+  </style>
+</head>
+<body>
+
+  <!-- Spotlight Cursor -->
+  <div id="spotlight"></div>
+
+  <!-- Grain Overlay -->
+  <div class="grain"></div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">PIXELFORGE</h1>
+      <p class="hero-sub">Curated by AI. Built for your screen.</p>
+    </div>
+    <div class="scroll-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </section>
+
+  <!-- Sticky Category + Search Bar -->
+  <div class="sticky-bar">
+    <div class="bar-inner">
+      <div class="filters" id="filters">
+        <button class="filter-btn active" data-cat="All">All</button>
+        <button class="filter-btn" data-cat="Anime">Anime</button>
+        <button class="filter-btn" data-cat="Dark">Dark</button>
+        <button class="filter-btn" data-cat="Sci-Fi">Sci-Fi</button>
+        <button class="filter-btn" data-cat="Nature">Nature</button>
+        <button class="filter-btn" data-cat="Abstract">Abstract</button>
+        <button class="filter-btn" data-cat="Cyberpunk">Cyberpunk</button>
+        <button class="filter-btn" data-cat="Minimal">Minimal</button>
+        <button class="filter-btn" data-cat="Fantasy">Fantasy</button>
+        <button class="filter-btn" data-cat="AI Art">AI Art</button>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search…" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <div class="count-bar" id="countBar"></div>
+    <div class="masonry" id="grid"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer>PIXELFORGE V2 — Powered by <span>Reddit</span> + <span>Gemini AI</span></footer>
+
+  <script>
+    /* ═══ State ═══ */
+    let wallpapers = [];
+    let activeCategory = 'All';
+    const grid = document.getElementById('grid');
+    const countBar = document.getElementById('countBar');
+    const searchInput = document.getElementById('searchInput');
+    const filtersEl = document.getElementById('filters');
+    const heroBg = document.getElementById('heroBg');
+    const spotlight = document.getElementById('spotlight');
+
+    /* ═══ Spotlight Cursor ═══ */
+    let mouseX = -500, mouseY = -500;
+    let spotX = -500, spotY = -500;
+    function updateSpotlight() {
+      spotX += (mouseX - spotX) * 0.12;
+      spotY += (mouseY - spotY) * 0.12;
+      spotlight.style.left = spotX + 'px';
+      spotlight.style.top = spotY + 'px';
+      requestAnimationFrame(updateSpotlight);
+    }
+    document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+    requestAnimationFrame(updateSpotlight);
+
+    /* ═══ Hero Parallax ═══ */
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      heroBg.style.transform = `translateY(${scrollY * 0.35}px) scale(1.1)`;
+    });
+
+    /* ═══ Skeleton ═══ */
+    const skeletonHeights = [220, 300, 260, 340, 240, 280, 310, 200, 250, 290, 270, 320];
+    function showSkeletons(n = 12) {
+      grid.innerHTML = '';
+      countBar.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        const h = skeletonHeights[i % skeletonHeights.length];
+        grid.innerHTML += `
+          <div class="skeleton">
+            <div class="sk-img" style="height:${h}px"></div>
+            <div class="sk-body">
+              <div class="sk-line w70"></div>
+              <div class="sk-line w40"></div>
+            </div>
+          </div>`;
+      }
+    }
+
+    /* ═══ Download via blob ═══ */
+    async function downloadImage(url, title) {
+      try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const ext = url.split('.').pop().split('?')[0] || 'jpg';
+        a.download = (title || 'wallpaper').replace(/[^a-zA-Z0-9]/g, '_') + '.' + ext;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        window.open(url, '_blank');
+      }
+    }
+
+    /* ═══ Render ═══ */
+    function render() {
+      const query = searchInput.value.toLowerCase().trim();
+      const filtered = wallpapers.filter(w => {
+        const matchCat = activeCategory === 'All' || w.category === activeCategory;
+        const matchSearch = !query
+          || w.title.toLowerCase().includes(query)
+          || (w.tags || []).some(t => t.toLowerCase().includes(query));
+        return matchCat && matchSearch;
+      });
+
+      countBar.innerHTML = `<span>${filtered.length}</span>&nbsp;wallpaper${filtered.length !== 1 ? 's' : ''}${activeCategory !== 'All' ? ' in ' + activeCategory : ''}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="state-msg" style="column-span:all">
+            <div class="emoji">🔍</div>
+            <h2>NOTHING HERE</h2>
+            <p>No wallpapers match your filter. Try something else.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((w, i) => {
+        const cleanTitle = w.title.replace(/\[.*?\]/g, '').trim();
+        return `
+        <div class="card" data-tilt data-tilt-max="12" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.25" data-tilt-scale="1.04" data-index="${i}">
+          <div class="card-img-wrap">
+            <img src="${w.image_url}" alt="${cleanTitle}" loading="lazy" />
+            <div class="img-gradient"></div>
+            <div class="category-badge">${w.category}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${cleanTitle}</div>
+            <div class="card-bottom">
+              <div class="card-tags">${(w.tags || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+              <button class="btn-download" onclick="downloadImage('${w.image_url}', '${cleanTitle.replace(/'/g, "\\'")}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      initTilt();
+      observeCards();
+    }
+
+    /* ═══ Vanilla Tilt Init ═══ */
+    function initTilt() {
+      document.querySelectorAll('[data-tilt]').forEach(el => {
+        VanillaTilt.init(el, {
+          max: 12, speed: 400, glare: true,
+          'max-glare': 0.25, scale: 1.04,
+        });
+      });
+    }
+
+    /* ═══ Intersection Observer for stagger ═══ */
+    function observeCards() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = parseInt(entry.target.dataset.index) || 0;
+            setTimeout(() => entry.target.classList.add('visible'), idx * 50);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.05 });
+
+      document.querySelectorAll('.card').forEach(c => observer.observe(c));
+    }
+
+    /* ═══ Set Hero Background ═══ */
+    function setHeroBg() {
+      if (wallpapers.length === 0) return;
+      const rand = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+      heroBg.style.backgroundImage = `url('${rand.image_url}')`;
+    }
+    setInterval(setHeroBg, 10000);
+
+    /* ═══ Fetch ═══ */
+    async function fetchWallpapers() {
+      showSkeletons();
+      try {
+        const res = await fetch('/api/wallpapers');
+        if (!res.ok) throw new Error('Failed');
+        wallpapers = await res.json();
+        if (!Array.isArray(wallpapers)) throw new Error('Bad data');
+        setHeroBg();
+        render();
+      } catch (e) {
+        grid.innerHTML = `
+          <div class="state-msg" style="column-span:all">
+            <div class="emoji">⚠️</div>
+            <h2>FAILED TO LOAD</h2>
+            <p>Could not fetch wallpapers. Make sure the server is running.</p>
+            <button class="btn-retry" onclick="fetchWallpapers()">Retry</button>
+          </div>`;
+        countBar.innerHTML = '';
+      }
+    }
+
+    /* ═══ Events ═══ */
+    filtersEl.addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.cat;
+      render();
+    });
+
+    searchInput.addEventListener('input', render);
+
+    /* ═══ Init ═══ */
+    fetchWallpapers();
+  </script>
+</body>
+</html>
