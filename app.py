@@ -1,41 +1,34 @@
 import os
-import json
-import tempfile
-from flask import Flask, jsonify, send_from_directory, request
+import requests
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), "wallpapers.json")
-PENDING_FILE = os.path.join(os.path.dirname(__file__), "pending.json")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY")
 
+READ_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}"
+}
 
-def load_json_file(filepath: str) -> list[dict]:
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+WRITE_HEADERS = {
+    "apikey": SUPABASE_SERVICE_KEY,
+    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=minimal"
+}
 
-
-def save_json_file_atomic(filepath: str, data: list[dict]):
-    # Write to a temporary file in the same directory, then replace atomically
-    dir_name = os.path.dirname(filepath)
-    fd, temp_path = tempfile.mkstemp(dir=dir_name, suffix=".json", prefix="tmp_")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        os.replace(temp_path, filepath)
-    except Exception as e:
-        os.remove(temp_path)
-        raise e
-
-
+# --- STATIC ROUTES ---
 @app.route("/")
 def index():
     return send_from_directory(".", "index.html")
-
 
 @app.route("/admin")
 def admin():
@@ -45,130 +38,112 @@ def admin():
 def about():
     return send_from_directory(".", "about.html")
 
-
-@app.route("/api/wallpapers")
+# --- API ROUTES ---
+@app.route('/api/wallpapers')
 def get_wallpapers():
-    wallpapers = load_json_file(DATA_FILE)
-    for w in wallpapers:
-        if "orientation" not in w:
-            w["orientation"] = "desktop"
-    return jsonify(wallpapers)
+    # Adding order=added_at.desc to mirror standard library viewing
+    res = requests.get(
+        f"{SUPABASE_URL}/rest/v1/wallpapers?select=*&order=added_at.desc",
+        headers=READ_HEADERS
+    )
+    return jsonify(res.json()), res.status_code
 
-
-@app.route("/api/pending")
+@app.route('/api/pending')
 def get_pending():
-    return jsonify(load_json_file(PENDING_FILE))
+    res = requests.get(
+        f"{SUPABASE_URL}/rest/v1/pending?select=*&order=added_at.desc",
+        headers=READ_HEADERS
+    )
+    return jsonify(res.json()), res.status_code
 
-
-@app.route("/api/approve/<string:wp_id>", methods=["POST"])
+@app.route('/api/approve/<wp_id>', methods=['POST'])
 def approve(wp_id):
-    pending = load_json_file(PENDING_FILE)
-    wallpapers = load_json_file(DATA_FILE)
+    data = request.json or {}
     
-    updates = request.json or {}
-    item_to_move = None
-    new_pending = []
-    
-    for item in pending:
-        if item.get("id") == wp_id:
-            item_to_move = item
-        else:
-            new_pending.append(item)
-            
-    if not item_to_move:
-        return jsonify({"error": "Not found"}), 404
+    # Get from pending
+    res = requests.get(
+        f"{SUPABASE_URL}/rest/v1/pending?id=eq.{wp_id}&select=*",
+        headers=READ_HEADERS
+    )
+    items = res.json()
+    if not items or res.status_code != 200:
+        return jsonify({"error": "Not found in pending"}), 404
         
+    wallpaper = items[0]
+    
     # Apply updates
-    if "title" in updates:
-        item_to_move["title"] = updates["title"]
-    if "category" in updates:
-        item_to_move["category"] = updates["category"]
-    if "tags" in updates:
-        item_to_move["tags"] = updates["tags"]
+    if "title" in data:
+        wallpaper["title"] = data["title"]
+    if "category" in data:
+        wallpaper["category"] = data["category"]
+    if "tags" in data:
+        wallpaper["tags"] = data["tags"]
         
-    # Add to main collection (at top so it's fresh)
-    wallpapers.insert(0, item_to_move)
-    
-    save_json_file_atomic(DATA_FILE, wallpapers)
-    save_json_file_atomic(PENDING_FILE, new_pending)
-    return jsonify({"success": True})
+    # Insert into wallpapers
+    insert_res = requests.post(f"{SUPABASE_URL}/rest/v1/wallpapers", headers=WRITE_HEADERS, json=wallpaper)
+    if str(insert_res.status_code).startswith('2'):
+        requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=eq.{wp_id}", headers=WRITE_HEADERS)
+        return jsonify({"success": True})
+        
+    return jsonify({"error": "Failed to approve"}), insert_res.status_code
 
-
-@app.route("/api/reject/<string:wp_id>", methods=["POST"])
+@app.route('/api/reject/<wp_id>', methods=['POST'])
 def reject(wp_id):
-    pending = load_json_file(PENDING_FILE)
-    new_pending = [item for item in pending if item.get("id") != wp_id]
-    
-    if len(pending) == len(new_pending):
-        return jsonify({"error": "Not found"}), 404
-        
-    save_json_file_atomic(PENDING_FILE, new_pending)
-    return jsonify({"success": True})
+    res = requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=eq.{wp_id}", headers=WRITE_HEADERS)
+    if str(res.status_code).startswith('2'):
+        return jsonify({"success": True})
+    return jsonify({"error": "Failed to reject"}), res.status_code
 
-
-@app.route("/api/approve-all", methods=["POST"])
+@app.route('/api/approve-all', methods=['POST'])
 def approve_all():
-    pending = load_json_file(PENDING_FILE)
-    if not pending:
+    # 1. Fetch pending
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=*", headers=READ_HEADERS)
+    pending = res.json()
+    if not pending or res.status_code != 200:
         return jsonify({"success": True, "count": 0})
         
-    wallpapers = load_json_file(DATA_FILE)
-    # prepend the approved ones
-    wallpapers = pending + wallpapers
+    # 2. Insert into wallpapers
+    insert_res = requests.post(f"{SUPABASE_URL}/rest/v1/wallpapers", headers=WRITE_HEADERS, json=pending)
     
-    save_json_file_atomic(DATA_FILE, wallpapers)
-    save_json_file_atomic(PENDING_FILE, [])
-    return jsonify({"success": True, "count": len(pending)})
+    if str(insert_res.status_code).startswith('2'):
+        # 3. Delete from pending
+        requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=not.is.null", headers=WRITE_HEADERS)
+        return jsonify({"success": True, "count": len(pending)})
+        
+    return jsonify({"error": "Failed to approve all"}), insert_res.status_code
 
-
-@app.route("/api/reject-all", methods=["POST"])
+@app.route('/api/reject-all', methods=['POST'])
 def reject_all():
-    pending = load_json_file(PENDING_FILE)
-    count = len(pending)
-    save_json_file_atomic(PENDING_FILE, [])
-    return jsonify({"success": True, "count": count})
+    # Count first
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=*", headers=READ_HEADERS)
+    count = len(res.json()) if res.status_code == 200 else 0
+    
+    del_res = requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=not.is.null", headers=WRITE_HEADERS)
+    if str(del_res.status_code).startswith('2'):
+        return jsonify({"success": True, "count": count})
+    return jsonify({"error": "Failed to reject all"}), del_res.status_code
 
-
-@app.route("/api/update/<string:wp_id>", methods=["POST"])
+@app.route('/api/update/<wp_id>', methods=['POST'])
 def update(wp_id):
-    wallpapers = load_json_file(DATA_FILE)
-    updates = request.json or {}
-    
-    found = False
-    for item in wallpapers:
-        if item.get("id") == wp_id:
-            if "title" in updates:
-                item["title"] = updates["title"]
-            if "category" in updates:
-                item["category"] = updates["category"]
-            if "tags" in updates:
-                item["tags"] = updates["tags"]
-            found = True
-            break
-            
-    if not found:
-        return jsonify({"error": "Not found"}), 404
+    data = request.json or {}
+    if not data:
+        return jsonify({"error": "No updates provided"}), 400
         
-    save_json_file_atomic(DATA_FILE, wallpapers)
-    return jsonify({"success": True})
+    res = requests.patch(f"{SUPABASE_URL}/rest/v1/wallpapers?id=eq.{wp_id}", headers=WRITE_HEADERS, json=data)
+    if str(res.status_code).startswith('2'):
+        return jsonify({"success": True})
+    return jsonify({"error": "Failed to update"}), res.status_code
 
-
-@app.route("/api/delete/<string:wp_id>", methods=["POST"])
+@app.route('/api/delete/<wp_id>', methods=['POST'])
 def delete_wp(wp_id):
-    wallpapers = load_json_file(DATA_FILE)
-    new_wallpapers = [item for item in wallpapers if item.get("id") != wp_id]
-    
-    if len(wallpapers) == len(new_wallpapers):
-        return jsonify({"error": "Not found"}), 404
-        
-    save_json_file_atomic(DATA_FILE, new_wallpapers)
-    return jsonify({"success": True})
+    res = requests.delete(f"{SUPABASE_URL}/rest/v1/wallpapers?id=eq.{wp_id}", headers=WRITE_HEADERS)
+    if str(res.status_code).startswith('2'):
+        return jsonify({"success": True})
+    return jsonify({"error": "Failed to delete"}), res.status_code
 
-@app.route("/api/test", methods=["POST"])
+@app.route('/api/test', methods=['POST'])
 def test():
     return jsonify({"status": "ok"})
-
-print(app.url_map)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
