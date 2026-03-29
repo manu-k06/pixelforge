@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/approve/([^/]+)", "dest": "/api/approve.py?id=$1" },
+    { "src": "/api/reject/([^/]+)", "dest": "/api/reject.py?id=$1" },
+    { "src": "/api/delete/([^/]+)", "dest": "/api/delete.py?id=$1" },
+    { "src": "/api/update/([^/]+)", "dest": "/api/update.py?id=$1" },
+    { "src": "/api/approve-all", "dest": "/api/approve_all.py" },
+    { "src": "/api/reject-all", "dest": "/api/reject_all.py" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/about", "dest": "/about.html" },
+    { "src": "/", "dest": "/index.html" }
+  ]
+}

@@ -17,12 +17,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY")
+
 MODEL = "gemini-2.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
 HEADERS = {"User-Agent": "PixelForge/1.0"}
-DATA_FILE = os.path.join(os.path.dirname(__file__), "wallpapers.json")
-PENDING_FILE = os.path.join(os.path.dirname(__file__), "pending.json")
+
+def get_supabase_headers():
+    return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json"
+    }
 
 SUBREDDITS = [
     "wallpapers",
@@ -60,18 +68,18 @@ def is_direct_image(url: str) -> bool:
     return any(lower.endswith(ext) for ext in IMAGE_EXTENSIONS)
 
 
-def load_json_file(filepath: str) -> list[dict]:
+def fetch_urls_from_supabase() -> set[str]:
+    urls = set()
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
-
-def save_json_file(filepath: str, data: list[dict]):
-    # We write directly here; for app.py we will use atomic os.replace
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/wallpapers?select=image_url", headers=get_supabase_headers())
+        if res.status_code == 200:
+            urls.update(item["image_url"] for item in res.json())
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=image_url", headers=get_supabase_headers())
+        if res.status_code == 200:
+            urls.update(item["image_url"] for item in res.json())
+    except Exception as e:
+        print(f"  ✗ Failed to fetch existing urls from Supabase: {e}")
+    return urls
 
 
 def judge_image(image_url: str) -> dict | None:
@@ -162,9 +170,7 @@ def fetch_subreddit(subreddit: str) -> list[dict]:
 
 
 def run_pipeline():
-    existing_wallpapers = load_json_file(DATA_FILE)
-    existing_pending = load_json_file(PENDING_FILE)
-    existing_urls = {w["image_url"] for w in existing_wallpapers + existing_pending}
+    existing_urls = fetch_urls_from_supabase()
 
     new_wallpapers = []
     total_judged: int = 0
@@ -220,11 +226,14 @@ def run_pipeline():
             existing_urls.add(image_url)
             print(f"Result: approved")
 
-    all_pending = existing_pending + new_wallpapers
-    save_json_file(PENDING_FILE, all_pending)
-
-    print(f"Done! Saved {len(new_wallpapers)} wallpapers to pending.json for review")
-    print(f"Total wallpapers pending review: {len(all_pending)}")
+    if new_wallpapers:
+        res = requests.post(f"{SUPABASE_URL}/rest/v1/pending", headers=get_supabase_headers(), json=new_wallpapers)
+        if str(res.status_code).startswith('2'):
+            print(f"Done! Saved {len(new_wallpapers)} wallpapers to Supabase pending table for review")
+        else:
+            print(f"Failed to save to Supabase: {res.status_code} {res.text}")
+    else:
+        print("Done! No new wallpapers to save.")
 
 
 if __name__ == "__main__":
