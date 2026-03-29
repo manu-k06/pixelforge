@@ -88,7 +88,7 @@
     .header-text h1 {
       font-family: 'Bebas Neue', cursive; font-size: 3.5rem; letter-spacing: 2px;
       background: -webkit-linear-gradient(0deg, var(--accent-orange), var(--accent-blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
       line-height: 1; margin-bottom: 8px;
     }
     .header-text p { color: var(--text-muted); font-size: 1.1rem; }
@@ -209,6 +209,41 @@
     #lightbox-tags { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag { padding: 2px 8px; border-radius: 100px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); color: var(--text-muted); font-size: .6rem; font-weight: 500; white-space: nowrap; }
 
+    /* --- Mobile Responsiveness --- */
+    @media (max-width: 640px) {
+      .login-form {
+        padding: 0 24px;
+        box-sizing: border-box;
+      }
+      .login-form input, .login-form button {
+        width: 100%;
+        max-width: none;
+      }
+      #login-screen h1 {
+        font-size: 2.8rem;
+        text-align: center;
+        padding: 0 16px;
+      }
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls-bar .left {
+        margin-right: 0;
+        justify-content: center;
+        margin-bottom: 8px;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .search-input, .filter-select {
+        width: 100%;
+      }
+      #admin-panel {
+        padding: 24px 16px;
+      }
+    }
   </style>
 </head>
 <body>

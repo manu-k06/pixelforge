@@ -514,6 +514,39 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+    /* ───── Mobile Responsiveness ───── */
+    @media (max-width: 768px) {
+      .filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+      }
+      .filters::-webkit-scrollbar { display: none; }
+      .filter-btn { font-size: 0.55rem; padding: 6px 12px; flex-shrink: 0; }
+      
+      .view-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+      }
+      .view-tabs::-webkit-scrollbar { display: none; }
+      .view-tab { flex-shrink: 0; }
+      
+      .hero-title { font-size: clamp(3rem, 15vw, 6rem); letter-spacing: 4px; }
+      .hero-sub { font-size: 0.75rem; margin-top: 12px; }
+      .hero-content { padding: 0 16px; }
+
+      #lightbox-img { max-width: 95vw; }
+      .lightbox-info { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px 20px; }
+      .lightbox-info > div:last-child { width: 100%; flex-direction: column; }
+      #lightbox-copy, #lightbox-download { width: 100%; text-align: center; }
+      #lightbox-close { top: 16px; right: 16px; font-size: 2.5rem; padding: 12px; }
+      
+      #scrollTop { bottom: 20px !important; right: 20px !important; }
+    }
   </style>
 </head>
 <body>
