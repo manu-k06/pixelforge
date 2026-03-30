@@ -2,7 +2,10 @@ import os
 import json
 import urllib.parse
 import requests
+import jwt
 from http.server import BaseHTTPRequestHandler
+
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET")
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
@@ -10,6 +13,18 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
+            auth = self.headers.get('Authorization', '')
+            token = auth.replace('Bearer ', '')
+            try:
+                jwt.decode(token, ADMIN_SECRET, algorithms=['HS256'])
+            except Exception:
+                self.send_response(401)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Unauthorized'}).encode())
+                return
+
             query_components = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             wp_id = query_components.get("id", [None])[0]
             

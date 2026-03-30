@@ -5,6 +5,7 @@
     { "src": "*.html", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/auth", "dest": "/api/auth.py" },
     { "src": "/api/wallpapers", "dest": "/api/wallpapers.py" },
     { "src": "/api/pending", "dest": "/api/pending.py" },
     { "src": "/api/approve-all", "dest": "/api/approve-all.py" },

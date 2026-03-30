@@ -326,6 +326,18 @@
     let pendingData = [];
     let libraryData = [];
 
+    /* AUTH HELPERS */
+    function getToken() { return localStorage.getItem('adminToken'); }
+    function authHeaders() {
+      return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() };
+    }
+    function handleUnauthorized() {
+      localStorage.removeItem('adminToken');
+      loginScreen.style.display = 'flex';
+      loginScreen.style.opacity = '1';
+      adminPanel.style.display = 'none';
+    }
+
     /* LOGIN LOGIC */
     const loginForm = document.getElementById('login-form');
     const pwdInput = document.getElementById('password');
@@ -334,24 +346,43 @@
     const loginScreen = document.getElementById('login-screen');
     const adminPanel = document.getElementById('admin-panel');
 
-    loginForm.addEventListener('submit', (e) => {
+    // Auto-login if token already stored
+    if (getToken()) {
+      loginScreen.style.display = 'none';
+      adminPanel.style.display = 'block';
+      fetchData();
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (userInput.value === 'pixelforge' && pwdInput.value === 'pixelforge2026') {
-        loginScreen.style.opacity = '0';
-        setTimeout(() => {
-          loginScreen.style.display = 'none';
-          adminPanel.style.display = 'block';
-          fetchData();
-        }, 500);
-      } else {
-        pwdInput.classList.remove('error');
-        userInput.classList.remove('error');
-        void pwdInput.offsetWidth; 
-        void userInput.offsetWidth; 
-        pwdInput.classList.add('error');
-        userInput.classList.add('error');
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: userInput.value, password: pwdInput.value })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem('adminToken', data.token);
+          loginScreen.style.opacity = '0';
+          setTimeout(() => {
+            loginScreen.style.display = 'none';
+            adminPanel.style.display = 'block';
+            fetchData();
+          }, 500);
+        } else {
+          pwdInput.classList.remove('error');
+          userInput.classList.remove('error');
+          void pwdInput.offsetWidth;
+          void userInput.offsetWidth;
+          pwdInput.classList.add('error');
+          userInput.classList.add('error');
+          loginErr.style.opacity = '1';
+          pwdInput.value = '';
+        }
+      } catch (err) {
+        loginErr.textContent = 'Network error. Try again.';
         loginErr.style.opacity = '1';
-        pwdInput.value = '';
       }
     });
 
@@ -479,13 +510,11 @@
       const payload = action === 'approve' ? gatherFields(id, 'pending') : {};
       try {
         const res = await fetch(`/api/${action}/${id}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)
         });
+        if (res.status === 401) { handleUnauthorized(); return; }
         if (res.ok) {
-          if(action === 'approve') {
-             // To immediately display in library without full fetch, optionally push it. Let's refetch silently.
-             fetchLibrary(); 
-          }
+          if(action === 'approve') { fetchLibrary(); }
           pendingData = pendingData.filter(w => w.id !== id);
           animateRemoval(`card-${id}`, renderPending);
           showToast(action === 'approve' ? 'Approved!' : 'Rejected', action === 'approve' ? 'var(--success)' : 'var(--danger)');
@@ -496,11 +525,8 @@
     async function removeWallpaper(id) {
       if (!confirm('Remove this wallpaper?')) return;
       try {
-        const testRes = await fetch('/api/test', {method: 'POST'});
-        console.log('Test status:', testRes.status);
-        
-        const res = await fetch('/api/delete/' + id, {method: 'POST'});
-        console.log('Status:', res.status);
+        const res = await fetch('/api/delete/' + id, { method: 'POST', headers: authHeaders() });
+        if (res.status === 401) { handleUnauthorized(); return; }
         if (res.ok) {
           const card = document.getElementById('card-' + id);
           if (card) {
@@ -508,7 +534,6 @@
             card.style.opacity = '0';
             setTimeout(() => card.remove(), 300);
           }
-          // Also remove from array so it doesn't reappear on search redraw
           libraryData = libraryData.filter(w => String(w.id) !== String(id));
         }
       } catch(e) {
@@ -520,15 +545,13 @@
       const payload = gatherFields(id, 'library');
       try {
         const res = await fetch(`/api/${action}/${id}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)
         });
+        if (res.status === 401) { handleUnauthorized(); return; }
         if (res.ok) {
           showToast('Saved successfully!', 'var(--accent-blue)');
-          // Update local state smoothly
           const wp = libraryData.find(w => String(w.id) === String(id));
-          if (wp) {
-            wp.title = payload.title; wp.category = payload.category; wp.tags = payload.tags;
-          }
+          if (wp) { wp.title = payload.title; wp.category = payload.category; wp.tags = payload.tags; }
         } else {
           showToast('Failed: Not Found or Error', 'var(--danger)');
         }
@@ -538,7 +561,8 @@
     async function bulkAction(action) {
       if (pendingData.length === 0 || !confirm(`Sure you want to ${action.toUpperCase()} ALL pending?`)) return;
       try {
-        const res = await fetch(`/api/${action}-all`, { method: 'POST' });
+        const res = await fetch(`/api/${action}-all`, { method: 'POST', headers: authHeaders() });
+        if (res.status === 401) { handleUnauthorized(); return; }
         if (res.ok) {
           const result = await res.json();
           pendingData = []; renderPending(); fetchLibrary();
@@ -584,3 +608,4 @@
   </script>
 </body>
 </html>
+
