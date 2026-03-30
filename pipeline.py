@@ -184,30 +184,113 @@ def judge_image(image_url: str) -> dict | None:
             return None
 
 
+def parse_rss_posts(xml_text: str) -> list[dict]:
+    """Parse Reddit RSS XML into the same format as JSON API children."""
+    import xml.etree.ElementTree as ET
+    posts = []
+    try:
+        root = ET.fromstring(xml_text)
+        ns = {'atom': 'http://www.w3.org/2005/Atom'}
+        for entry in root.findall('atom:entry', ns):
+            content_el = entry.find('atom:content', ns)
+            if content_el is None or content_el.text is None:
+                continue
+            content_html = content_el.text
+            title_el = entry.find('atom:title', ns)
+            link_el = entry.find('atom:link', ns)
+            # Extract image URLs from the HTML content
+            img_urls = re.findall(r'href="(https://i\.redd\.it/[^"]+)"', content_html)
+            if not img_urls:
+                img_urls = re.findall(r'src="(https://[^"]+\.(?:jpg|jpeg|png))"', content_html)
+            if img_urls:
+                posts.append({"data": {
+                    "url": img_urls[0],
+                    "title": title_el.text if title_el is not None else "Untitled",
+                    "permalink": link_el.get('href', '') if link_el is not None else '',
+                    "ups": 0,
+                }})
+    except ET.ParseError:
+        pass
+    return posts
+
+
 def fetch_subreddit(subreddit: str) -> list[dict]:
-    urls = [
-        f"https://www.reddit.com/r/{subreddit}/top.json?limit=25&t=week",
-        f"https://old.reddit.com/r/{subreddit}/top.json?limit=25&t=week",
-        f"https://gateway.reddit.com/desktopapi/v1/subreddits/{subreddit}?t=week"
-    ]
-    for url in urls:
+    # Source 1: Reddit RSS feed
+    try:
+        rss_url = f"https://www.reddit.com/r/{subreddit}/top/.rss?t=week&limit=25"
+        headers = {"User-Agent": "PixelForge/1.0"}
+        resp = session.get(rss_url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        posts = parse_rss_posts(resp.text)
+        if posts:
+            print(f"  ✓ Source: Reddit RSS ({len(posts)} posts)")
+            sys.stdout.flush()
+            return posts
+    except Exception as e:
+        print(f"  ⚠ RSS failed: {e}")
+        sys.stdout.flush()
+
+    time.sleep(random.uniform(1, 2))
+
+    # Source 2: Teddit mirror
+    try:
+        teddit_url = f"https://teddit.net/r/{subreddit}/top?t=week&api"
+        headers = {"User-Agent": random.choice(user_agents)}
+        resp = session.get(teddit_url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        posts = []
+        for item in data if isinstance(data, list) else data.get("links", data.get("children", [])):
+            post_data = item.get("data", item) if isinstance(item, dict) else item
+            if isinstance(post_data, dict) and post_data.get("url"):
+                posts.append({"data": post_data})
+        if posts:
+            print(f"  ✓ Source: Teddit ({len(posts)} posts)")
+            sys.stdout.flush()
+            return posts
+    except Exception as e:
+        print(f"  ⚠ Teddit failed: {e}")
+        sys.stdout.flush()
+
+    time.sleep(random.uniform(1, 2))
+
+    # Source 3: Libreddit mirror
+    try:
+        libreddit_url = f"https://libreddit.spike.codes/r/{subreddit}/top.json?t=week"
+        headers = {"User-Agent": random.choice(user_agents)}
+        resp = session.get(libreddit_url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        if "data" in data and "children" in data["data"]:
+            posts = data["data"]["children"]
+            print(f"  ✓ Source: Libreddit ({len(posts)} posts)")
+            sys.stdout.flush()
+            return posts
+    except Exception as e:
+        print(f"  ⚠ Libreddit failed: {e}")
+        sys.stdout.flush()
+
+    time.sleep(random.uniform(1, 2))
+
+    # Source 4: Fallback to direct Reddit JSON with rotating UA
+    try:
+        json_url = f"https://www.reddit.com/r/{subreddit}/top.json?limit=25&t=week"
         headers = {
             "User-Agent": random.choice(user_agents),
             "Accept": "application/json",
             "Accept-Language": "en-US,en;q=0.9",
         }
-        try:
-            resp = session.get(url, headers=headers, timeout=15)
-            resp.raise_for_status()
-            data = resp.json()
-            if "gateway.reddit.com" in url:
-                posts = data.get("posts", {})
-                return [{"data": p} for p in posts.values()]
-            else:
-                return data["data"]["children"]
-        except Exception as e:
-            continue
-    print(f"  ✗ All mirrors failed for r/{subreddit}")
+        resp = session.get(json_url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        posts = resp.json()["data"]["children"]
+        print(f"  ✓ Source: Reddit JSON fallback ({len(posts)} posts)")
+        sys.stdout.flush()
+        return posts
+    except Exception as e:
+        print(f"  ⚠ Reddit JSON fallback failed: {e}")
+        sys.stdout.flush()
+
+    print(f"  ✗ All sources failed for r/{subreddit}")
     sys.stdout.flush()
     return []
 
