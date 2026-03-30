@@ -4,28 +4,36 @@ import requests
 from http.server import BaseHTTPRequestHandler
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             headers = {
-                "apikey": SUPABASE_KEY,
-                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "apikey": SUPABASE_SERVICE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
                 "Content-Type": "application/json"
             }
             
-            # Fetch count first just to return it
+            # 1. Fetch all pending
             get_res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=*", headers=headers)
-            count = len(get_res.json()) if get_res.status_code == 200 else 0
+            pending_items = get_res.json()
             
-            # Delete all
-            del_res = requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=not.is.null", headers=headers)
+            if not pending_items:
+                self.send_success({"success": True, "count": 0})
+                return
+                
+            # 2. Insert into wallpapers
+            insert_res = requests.post(f"{SUPABASE_URL}/rest/v1/wallpapers", headers=headers, json=pending_items)
             
-            if str(del_res.status_code).startswith('2'):
-                self.send_success({"success": True, "count": count})
+            if str(insert_res.status_code).startswith('2'):
+                # 3. Delete from pending
+                # Workaround to delete all: id=not.is.null
+                requests.delete(f"{SUPABASE_URL}/rest/v1/pending?id=not.is.null", headers=headers)
+                
+                self.send_success({"success": True, "count": len(pending_items)})
             else:
-                self.send_error(del_res.status_code, "Failed to reject all")
+                self.send_error(insert_res.status_code, "Failed to insert batch")
         except Exception as e:
             self.send_error(500, str(e))
 

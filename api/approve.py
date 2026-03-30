@@ -6,12 +6,12 @@ from http.server import BaseHTTPRequestHandler
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 # Use SERVICE_KEY for write ops, fallback to KEY
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 def _get_headers():
     return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
         "Content-Type": "application/json"
     }
 

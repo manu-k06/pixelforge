@@ -23,7 +23,13 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY")
 MODEL = "gemini-2.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
-HEADERS = {"User-Agent": "PixelForge/1.0"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+}
 
 def get_supabase_headers():
     return {
@@ -180,6 +186,7 @@ def run_pipeline():
         if total_judged >= 15:
             break
         print(f"\n▸ Fetching r/{sub}...")
+        time.sleep(2)
         posts = fetch_subreddit(sub)
         images = [p for p in posts if is_direct_image(p["data"].get("url", ""))]
         print(f"  Found {len(images)} direct images out of {len(posts)} posts")

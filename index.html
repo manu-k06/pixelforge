@@ -372,13 +372,23 @@
 
     @media (max-width: 768px) {
       .masonry {
-        columns: 2;
+        columns: unset !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+      .card {
+        break-inside: unset !important;
+        margin-bottom: 0 !important;
+        width: 100% !important;
+        animation-delay: 0ms !important;
+        transition: opacity 0.2s ease !important;
       }
     }
 
     @media (max-width: 480px) {
       .masonry {
-        columns: 1;
+        grid-template-columns: repeat(1, 1fr) !important;
       }
     }
 
@@ -939,7 +949,9 @@
     /* ═══ Scroll To Top ═══ */
     window.addEventListener('scroll', () => {
       const scrollY = window.scrollY;
-      heroBg.style.transform = `translateY(${scrollY * 0.35}px) scale(1.1)`;
+      if (window.innerWidth > 768) {
+        heroBg.style.transform = `translateY(${scrollY * 0.35}px) scale(1.1)`;
+      }
 
       if (scrollY > 400) {
         scrollTopBtn.style.opacity = '1'; scrollTopBtn.style.pointerEvents = 'auto'; scrollTopBtn.style.transform = 'scale(1)';
@@ -1047,6 +1059,9 @@
 
     /* ═══ Vanilla Tilt Init ═══ */
     function initTilt() {
+      if (window.matchMedia('(hover: none)').matches) {
+        return;
+      }
       document.querySelectorAll('[data-tilt]').forEach(el => {
         VanillaTilt.init(el, {
           max: 12, speed: 400, glare: true,

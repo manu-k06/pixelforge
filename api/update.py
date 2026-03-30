@@ -5,7 +5,7 @@ import requests
 from http.server import BaseHTTPRequestHandler
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -26,8 +26,8 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             headers = {
-                "apikey": SUPABASE_KEY,
-                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "apikey": SUPABASE_SERVICE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal"
             }
