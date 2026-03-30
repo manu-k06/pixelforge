@@ -4,6 +4,7 @@ Run separately:  python pipeline.py
 """
 
 import os
+import sys
 import json
 import re
 import time
@@ -17,6 +18,9 @@ from io import BytesIO
 from PIL import Image
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+
+print("Pipeline starting...")
+sys.stdout.flush()
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -85,14 +89,15 @@ def is_direct_image(url: str) -> bool:
 def fetch_urls_from_supabase() -> set[str]:
     urls = set()
     try:
-        res = requests.get(f"{SUPABASE_URL}/rest/v1/wallpapers?select=image_url", headers=get_supabase_headers())
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/wallpapers?select=image_url", headers=get_supabase_headers(), timeout=30)
         if res.status_code == 200:
             urls.update(item["image_url"] for item in res.json())
-        res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=image_url", headers=get_supabase_headers())
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=image_url", headers=get_supabase_headers(), timeout=30)
         if res.status_code == 200:
             urls.update(item["image_url"] for item in res.json())
     except Exception as e:
         print(f"  ✗ Failed to fetch existing urls from Supabase: {e}")
+        sys.stdout.flush()
     return urls
 
 
@@ -102,6 +107,7 @@ def judge_image(image_url: str) -> dict | None:
         img_data = session.get(image_url, headers=headers, timeout=20).content
     except Exception as e:
         print(f"  ✗ Failed to download image: {e}")
+        sys.stdout.flush()
         return None
         
     try:
@@ -114,6 +120,7 @@ def judge_image(image_url: str) -> dict | None:
         ratio = width / height
         if 0.7 <= ratio <= 1.6:
             print(f"  ⊘ Skipping square/non-standard: {ratio:.2f}")
+            sys.stdout.flush()
             return None
             
         orientation = "mobile" if height > width else "desktop"
@@ -127,6 +134,7 @@ def judge_image(image_url: str) -> dict | None:
             resolution = "4K"
     except Exception as e:
         print(f"  ✗ Failed to process image with PIL: {e}")
+        sys.stdout.flush()
         return None
 
     # Determine mime type from URL
@@ -152,6 +160,7 @@ def judge_image(image_url: str) -> dict | None:
             resp = requests.post(GEMINI_URL, json=payload, timeout=30)
             if resp.status_code == 429 and attempt == 0:
                 print(f"  ⏳ Rate limited, waiting 60s then retrying…")
+                sys.stdout.flush()
                 time.sleep(60)
                 continue
             resp.raise_for_status()
@@ -167,9 +176,11 @@ def judge_image(image_url: str) -> dict | None:
             return None
         except requests.exceptions.HTTPError as e:
             print(f"  ✗ HTTP Error: {e}")
+            sys.stdout.flush()
             return None
         except Exception as e:
             print(f"  ✗ Error: {e}")
+            sys.stdout.flush()
             return None
 
 
@@ -197,10 +208,13 @@ def fetch_subreddit(subreddit: str) -> list[dict]:
         except Exception as e:
             continue
     print(f"  ✗ All mirrors failed for r/{subreddit}")
+    sys.stdout.flush()
     return []
 
 
 def run_pipeline():
+    print("Fetching existing URLs from Supabase...")
+    sys.stdout.flush()
     existing_urls = fetch_urls_from_supabase()
 
     new_wallpapers = []
@@ -211,10 +225,12 @@ def run_pipeline():
         if total_judged >= 15:
             break
         print(f"\n▸ Fetching r/{sub}...")
+        sys.stdout.flush()
         time.sleep(random.uniform(2, 5))
         posts = fetch_subreddit(sub)
         images = [p for p in posts if is_direct_image(p["data"].get("url", ""))]
         print(f"  Found {len(images)} direct images out of {len(posts)} posts")
+        sys.stdout.flush()
 
         for i, post in enumerate(images):
             if total_judged >= 15:
@@ -224,21 +240,25 @@ def run_pipeline():
 
             if image_url in existing_urls:
                 print(f"  ⊘ Skipping duplicate: {image_url[:60]}…")
+                sys.stdout.flush()
                 continue
 
             print(f"Processing {total_judged+1}/15: {image_url}")  # type: ignore
+            sys.stdout.flush()
             total_judged += 1  # type: ignore
 
             try:
                 judgement = judge_image(image_url)
             except Exception as e:
                 print(f"  ✗ Unexpected error, skipping: {e}")
+                sys.stdout.flush()
                 continue
 
             time.sleep(12)  # rate-limit: respect free-tier quota
 
             if judgement is None:
                 print(f"Result: rejected")
+                sys.stdout.flush()
                 continue
 
             total_approved += 1  # type: ignore
@@ -257,15 +277,19 @@ def run_pipeline():
             new_wallpapers.append(entry)
             existing_urls.add(image_url)
             print(f"Result: approved")
+            sys.stdout.flush()
 
     if new_wallpapers:
-        res = requests.post(f"{SUPABASE_URL}/rest/v1/pending", headers=get_supabase_headers(), json=new_wallpapers)
+        res = requests.post(f"{SUPABASE_URL}/rest/v1/pending", headers=get_supabase_headers(), json=new_wallpapers, timeout=30)
         if str(res.status_code).startswith('2'):
             print(f"Done! Saved {len(new_wallpapers)} wallpapers to Supabase pending table for review")
+            sys.stdout.flush()
         else:
             print(f"Failed to save to Supabase: {res.status_code} {res.text}")
+            sys.stdout.flush()
     else:
         print("Done! No new wallpapers to save.")
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
