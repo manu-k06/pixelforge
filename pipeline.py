@@ -9,7 +9,10 @@ import re
 import time
 import uuid
 import base64
+import random
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from io import BytesIO
 from PIL import Image
 from datetime import datetime, timezone
@@ -23,13 +26,18 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY")
 MODEL = "gemini-2.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-}
+user_agents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+    'facebookexternalhit/1.1',
+    'Twitterbot/1.0'
+]
+
+session = requests.Session()
+retry = Retry(total=3, backoff_factor=1)
+adapter = HTTPAdapter(max_retries=retry)
+session.mount('https://', adapter)
 
 def get_supabase_headers():
     return {
@@ -90,7 +98,8 @@ def fetch_urls_from_supabase() -> set[str]:
 
 def judge_image(image_url: str) -> dict | None:
     try:
-        img_data = requests.get(image_url, headers=HEADERS, timeout=20).content
+        headers = {"User-Agent": random.choice(user_agents)}
+        img_data = session.get(image_url, headers=headers, timeout=20).content
     except Exception as e:
         print(f"  ✗ Failed to download image: {e}")
         return None
@@ -165,14 +174,30 @@ def judge_image(image_url: str) -> dict | None:
 
 
 def fetch_subreddit(subreddit: str) -> list[dict]:
-    url = f"https://www.reddit.com/r/{subreddit}/top.json?limit=25&t=month"
-    try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-        resp.raise_for_status()
-        return resp.json()["data"]["children"]
-    except Exception as e:
-        print(f"  ✗ Failed to fetch r/{subreddit}: {e}")
-        return []
+    urls = [
+        f"https://www.reddit.com/r/{subreddit}/top.json?limit=25&t=week",
+        f"https://old.reddit.com/r/{subreddit}/top.json?limit=25&t=week",
+        f"https://gateway.reddit.com/desktopapi/v1/subreddits/{subreddit}?t=week"
+    ]
+    for url in urls:
+        headers = {
+            "User-Agent": random.choice(user_agents),
+            "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        try:
+            resp = session.get(url, headers=headers, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+            if "gateway.reddit.com" in url:
+                posts = data.get("posts", {})
+                return [{"data": p} for p in posts.values()]
+            else:
+                return data["data"]["children"]
+        except Exception as e:
+            continue
+    print(f"  ✗ All mirrors failed for r/{subreddit}")
+    return []
 
 
 def run_pipeline():
@@ -186,7 +211,7 @@ def run_pipeline():
         if total_judged >= 15:
             break
         print(f"\n▸ Fetching r/{sub}...")
-        time.sleep(2)
+        time.sleep(random.uniform(2, 5))
         posts = fetch_subreddit(sub)
         images = [p for p in posts if is_direct_image(p["data"].get("url", ""))]
         print(f"  Found {len(images)} direct images out of {len(posts)} posts")
