@@ -424,8 +424,20 @@
 
     async function fetchLibrary() {
       try {
-        const res = await fetch('/api/wallpapers');
-        libraryData = await res.json();
+        let all = [];
+        let offset = 0;
+        const limit = 100;
+        while (true) {
+          const res = await fetch(`/api/wallpapers?limit=${limit}&offset=${offset}`);
+          if (!res.ok) throw new Error('Failed');
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (data.items || []);
+          all = all.concat(items);
+          const hasMore = Array.isArray(data) ? false : !!data.has_more;
+          if (!hasMore || items.length === 0) break;
+          offset += items.length;
+        }
+        libraryData = all;
         renderLibrary();
       } catch (err) { showToast('Failed fetching library', 'var(--danger)'); }
     }

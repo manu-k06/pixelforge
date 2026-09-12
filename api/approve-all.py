@@ -1,15 +1,29 @@
 import json
 import os
+import sys
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 
 import jwt
 import requests
 
-from lib.image_storage import apply_rehost
+_API_DIR = str(Path(__file__).resolve().parent)
+if _API_DIR not in sys.path:
+    sys.path.insert(0, _API_DIR)
 
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
+
+
+def _rehost(item: dict) -> dict:
+    try:
+        from lib.image_storage import apply_rehost
+        return apply_rehost(item)
+    except Exception as e:
+        print(f"[approve-all] rehost skipped: {e}", flush=True)
+        item.setdefault("source_url", item.get("image_url"))
+        return item
 
 
 class handler(BaseHTTPRequestHandler):
@@ -53,7 +67,7 @@ class handler(BaseHTTPRequestHandler):
             for item in pending_items:
                 wp_id = item.get("id")
                 try:
-                    item = apply_rehost(item)
+                    item = _rehost(item)
                     insert_res = requests.post(
                         f"{SUPABASE_URL}/rest/v1/wallpapers",
                         headers=headers,

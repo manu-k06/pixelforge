@@ -39,6 +39,11 @@ class handler(BaseHTTPRequestHandler):
             }
 
             try:
+                import sys
+                from pathlib import Path
+                _api = str(Path(__file__).resolve().parent)
+                if _api not in sys.path:
+                    sys.path.insert(0, _api)
                 from lib.image_storage import delete_stored
                 delete_stored(wp_id)
             except Exception:

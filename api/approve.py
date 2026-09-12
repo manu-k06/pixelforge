@@ -1,12 +1,17 @@
 import json
 import os
+import sys
 import urllib.parse
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 
 import jwt
 import requests
 
-from lib.image_storage import apply_rehost
+# Ensure api/ is on path so `lib.image_storage` resolves on Vercel
+_API_DIR = str(Path(__file__).resolve().parent)
+if _API_DIR not in sys.path:
+    sys.path.insert(0, _API_DIR)
 
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
@@ -20,6 +25,17 @@ def _get_headers():
         "Content-Type": "application/json",
         "Prefer": "return=minimal",
     }
+
+
+def _rehost(item: dict) -> dict:
+    """Rehost when possible; never block approve if storage/Pillow fails."""
+    try:
+        from lib.image_storage import apply_rehost
+        return apply_rehost(item)
+    except Exception as e:
+        print(f"[approve] rehost skipped: {e}", flush=True)
+        item.setdefault("source_url", item.get("image_url"))
+        return item
 
 
 class handler(BaseHTTPRequestHandler):
@@ -68,8 +84,7 @@ class handler(BaseHTTPRequestHandler):
             if "tags" in updates:
                 item["tags"] = updates["tags"]
 
-            # Rehost to Supabase Storage (thumb + full WebP)
-            item = apply_rehost(item)
+            item = _rehost(item)
 
             insert_url = f"{SUPABASE_URL}/rest/v1/wallpapers"
             insert_res = requests.post(insert_url, headers=headers, json=item, timeout=60)
@@ -80,7 +95,10 @@ class handler(BaseHTTPRequestHandler):
 
                 self._json(200, {"success": True, "thumb_url": item.get("thumb_url")})
             else:
-                self._json(insert_res.status_code, {"error": "Failed to insert into library", "detail": insert_res.text[:200]})
+                self._json(
+                    insert_res.status_code,
+                    {"error": "Failed to insert into library", "detail": insert_res.text[:200]},
+                )
         except Exception as e:
             self._json(500, {"error": str(e)})
 
