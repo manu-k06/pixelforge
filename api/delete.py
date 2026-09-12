@@ -37,6 +37,12 @@ class handler(BaseHTTPRequestHandler):
                 "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
                 "Content-Type": "application/json"
             }
+
+            try:
+                from lib.image_storage import delete_stored
+                delete_stored(wp_id)
+            except Exception:
+                pass
             
             delete_url = f"{SUPABASE_URL}/rest/v1/wallpapers?id=eq.{wp_id}"
             res = requests.delete(delete_url, headers=headers)

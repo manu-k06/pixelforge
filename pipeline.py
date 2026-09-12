@@ -89,12 +89,28 @@ def is_direct_image(url: str) -> bool:
 def fetch_urls_from_supabase() -> set[str]:
     urls = set()
     try:
-        res = requests.get(f"{SUPABASE_URL}/rest/v1/wallpapers?select=image_url", headers=get_supabase_headers(), timeout=30)
+        res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/wallpapers?select=image_url,source_url",
+            headers=get_supabase_headers(),
+            timeout=30,
+        )
         if res.status_code == 200:
-            urls.update(item["image_url"] for item in res.json())
-        res = requests.get(f"{SUPABASE_URL}/rest/v1/pending?select=image_url", headers=get_supabase_headers(), timeout=30)
+            for item in res.json():
+                if item.get("image_url"):
+                    urls.add(item["image_url"])
+                if item.get("source_url"):
+                    urls.add(item["source_url"])
+        res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/pending?select=image_url,source_url",
+            headers=get_supabase_headers(),
+            timeout=30,
+        )
         if res.status_code == 200:
-            urls.update(item["image_url"] for item in res.json())
+            for item in res.json():
+                if item.get("image_url"):
+                    urls.add(item["image_url"])
+                if item.get("source_url"):
+                    urls.add(item["source_url"])
     except Exception as e:
         print(f"  ✗ Failed to fetch existing urls from Supabase: {e}")
         sys.stdout.flush()

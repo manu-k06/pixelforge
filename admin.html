@@ -442,7 +442,7 @@
 
       return `
         <div class="card" id="card-${wp.id}">
-          <img class="card-img" src="${wp.image_url}" onclick="openLightbox('${mode}', '${wp.id}')" loading="lazy">
+          <img class="card-img" src="${wp.thumb_url || wp.image_url}" onclick="openLightbox('${mode}', '${wp.id}')" loading="lazy">
           <div class="card-body">
             <div class="field">
               <label>Title</label>

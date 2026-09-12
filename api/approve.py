@@ -1,92 +1,95 @@
-import os
 import json
+import os
 import urllib.parse
-import requests
-import jwt
 from http.server import BaseHTTPRequestHandler
 
-ADMIN_SECRET = os.environ.get("ADMIN_SECRET")
+import jwt
+import requests
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-# Use SERVICE_KEY for write ops, fallback to KEY
+from lib.image_storage import apply_rehost
+
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
+
 
 def _get_headers():
     return {
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal",
     }
 
+
 class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+
     def do_POST(self):
         try:
-            auth = self.headers.get('Authorization', '')
-            token = auth.replace('Bearer ', '')
+            auth = self.headers.get("Authorization", "")
+            token = auth.replace("Bearer ", "")
             try:
-                jwt.decode(token, ADMIN_SECRET, algorithms=['HS256'])
+                jwt.decode(token, ADMIN_SECRET, algorithms=["HS256"])
             except Exception:
-                self.send_response(401)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Unauthorized'}).encode())
+                self._json(401, {"error": "Unauthorized"})
                 return
 
-            # Parse query params
             query_components = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             wp_id = query_components.get("id", [None])[0]
-            
+
             if not wp_id:
-                self.send_error(400, "Missing ID")
+                self._json(400, {"error": "Missing ID"})
                 return
 
-            # Read body
-            content_length = int(self.headers.get('Content-Length', 0))
+            content_length = int(self.headers.get("Content-Length", 0))
             post_data = self.rfile.read(content_length)
             updates = json.loads(post_data) if post_data else {}
 
-            # Fetch existing pending item
             headers = _get_headers()
             fetch_url = f"{SUPABASE_URL}/rest/v1/pending?id=eq.{wp_id}&select=*"
-            res = requests.get(fetch_url, headers=headers)
-            
+            res = requests.get(fetch_url, headers=headers, timeout=30)
+
             if res.status_code != 200 or not res.json():
-                self.send_error(404, "Pending wallpaper not found")
+                self._json(404, {"error": "Pending wallpaper not found"})
                 return
-                
+
             item = res.json()[0]
-            
-            # Apply updates
+
             if "title" in updates:
                 item["title"] = updates["title"]
             if "category" in updates:
                 item["category"] = updates["category"]
             if "tags" in updates:
                 item["tags"] = updates["tags"]
-                
-            # Insert into wallpapers
+
+            # Rehost to Supabase Storage (thumb + full WebP)
+            item = apply_rehost(item)
+
             insert_url = f"{SUPABASE_URL}/rest/v1/wallpapers"
-            insert_res = requests.post(insert_url, headers=headers, json=item)
-            
-            if insert_res.status_code in (201, 204) or str(insert_res.status_code).startswith('2'):
-                # Delete from pending
+            insert_res = requests.post(insert_url, headers=headers, json=item, timeout=60)
+
+            if str(insert_res.status_code).startswith("2"):
                 delete_url = f"{SUPABASE_URL}/rest/v1/pending?id=eq.{wp_id}"
-                requests.delete(delete_url, headers=headers)
-                
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+                requests.delete(delete_url, headers=headers, timeout=30)
+
+                self._json(200, {"success": True, "thumb_url": item.get("thumb_url")})
             else:
-                self.send_error(insert_res.status_code, "Failed to insert into library")
+                self._json(insert_res.status_code, {"error": "Failed to insert into library", "detail": insert_res.text[:200]})
         except Exception as e:
-            self.send_error(500, str(e))
-            
-    def send_error(self, code, message):
+            self._json(500, {"error": str(e)})
+
+    def _json(self, code, data):
         self.send_response(code)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header("Content-type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        self.wfile.write(json.dumps({"error": message}).encode('utf-8'))
+        self.wfile.write(json.dumps(data).encode("utf-8"))
+
+    def log_message(self, format, *args):
+        return

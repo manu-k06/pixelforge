@@ -1,3 +1,6 @@
 requests
 python-dotenv
 PyJWT
+Pillow
+Flask
+flask-cors

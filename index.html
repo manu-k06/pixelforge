@@ -893,6 +893,7 @@
   <main>
     <div class="count-bar" id="countBar"></div>
     <div class="masonry" id="grid"></div>
+    <div id="loadSentinel" style="height:1px;width:100%;column-span:all;" aria-hidden="true"></div>
   </main>
 
   <!-- Lightbox -->
@@ -925,6 +926,12 @@
     let activeCategory = 'All';
     let activeView = 'desktop';
     let activeRes = 'All';
+    let offset = 0;
+    let total = 0;
+    let hasMore = true;
+    let loading = false;
+    let heroReady = false;
+    const PAGE_SIZE = 36;
     const grid = document.getElementById('grid');
     const countBar = document.getElementById('countBar');
     const searchInput = document.getElementById('searchInput');
@@ -932,6 +939,10 @@
     const heroBg = document.getElementById('heroBg');
     const spotlight = document.getElementById('spotlight');
     const scrollTopBtn = document.getElementById('scrollTop');
+    const loadSentinel = document.getElementById('loadSentinel');
+
+    const thumbOf = w => w.thumb_url || w.image_url;
+    const fullOf = w => w.image_url;
 
     /* ═══ Spotlight Cursor ═══ */
     let mouseX = -500, mouseY = -500;
@@ -989,7 +1000,7 @@
         const blob = await resp.blob();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        const ext = url.split('.').pop().split('?')[0] || 'jpg';
+        const ext = (url.split('.').pop() || 'webp').split('?')[0] || 'webp';
         a.download = (title || 'wallpaper').replace(/[^a-zA-Z0-9]/g, '_') + '.' + ext;
         document.body.appendChild(a);
         a.click();
@@ -1000,129 +1011,200 @@
       }
     }
 
-    /* ═══ Render ═══ */
-    function render() {
-      showSkeletons();
+    function escapeAttr(s) {
+      return String(s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
 
-      const query = searchInput.value.toLowerCase().trim();
-      const filtered = wallpapers.filter(w => {
-        const matchCat = activeCategory === 'All' || w.category === activeCategory;
-        const matchView = w.orientation === activeView;
-        const matchRes = activeRes === 'All' || (w.resolution && w.resolution === activeRes);
-        const matchSearch = !query
-          || w.title.toLowerCase().includes(query)
-          || (w.tags || []).some(t => t.toLowerCase().includes(query));
-        return matchCat && matchView && matchRes && matchSearch;
-      });
-
-      countBar.innerHTML = `<span>${filtered.length}</span>&nbsp;wallpaper${filtered.length !== 1 ? 's' : ''}${activeCategory !== 'All' ? ' in ' + activeCategory : ''}`;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="state-msg" style="column-span:all">
-            <h2>NOTHING HERE</h2>
-            <p>No wallpapers match your filters. Try something else.</p>
-          </div>`;
-        return;
-      }
-
-      grid.innerHTML = filtered.map((w, i) => {
-        const cleanTitle = w.title.replace(/\[.*?\]/g, '').trim();
-        return `
+    function cardHtml(w, i) {
+      const cleanTitle = (w.title || '').replace(/\[.*?\]/g, '').trim();
+      const thumb = thumbOf(w);
+      const full = fullOf(w);
+      return `
         <div class="card" data-tilt data-tilt-max="12" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.25" data-tilt-scale="1.04" data-index="${i}">
-          <div class="card-img-wrap" style="cursor: pointer" onclick="openLightbox(${wallpapers.indexOf(w)})">
-            <img src="${w.image_url}" alt="${cleanTitle}" loading="lazy" />
+          <div class="card-img-wrap" style="cursor: pointer" onclick="openLightbox(${i})">
+            <img src="${thumb}" alt="${cleanTitle}" loading="lazy" decoding="async" />
             <div class="img-gradient"></div>
-            <div class="category-badge">${w.category}</div>
+            <div class="category-badge">${w.category || ''}</div>
           </div>
           <div class="card-body">
             <div class="card-title">${cleanTitle}</div>
             <div class="card-bottom">
               <div class="card-tags">${(w.tags || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')}</div>
               <div style="display:flex; gap: 8px;">
-                <button class="btn-download" title="Copy Link" onclick="event.stopPropagation(); copyCardLink('${w.image_url}', this)" style="border-color: #0ea5e9; color: #0ea5e9;">
+                <button class="btn-download" title="Copy Link" onclick="event.stopPropagation(); copyCardLink('${escapeAttr(full)}', this)" style="border-color: #0ea5e9; color: #0ea5e9;">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </button>
-                <button class="btn-download" onclick="event.stopPropagation(); downloadImage('${w.image_url}', '${cleanTitle.replace(/'/g, "\\'")}')">
+                <button class="btn-download" onclick="event.stopPropagation(); downloadImage('${escapeAttr(full)}', '${escapeAttr(cleanTitle)}')">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      `;
-      }).join('');
+        </div>`;
+    }
 
-      initTilt();
-      observeCards();
+    function updateCountBar() {
+      countBar.innerHTML = `<span>${total}</span>&nbsp;wallpaper${total !== 1 ? 's' : ''}${activeCategory !== 'All' ? ' in ' + activeCategory : ''}`;
+    }
+
+    function appendCards(items, startIndex) {
+      const html = items.map((w, i) => cardHtml(w, startIndex + i)).join('');
+      grid.insertAdjacentHTML('beforeend', html);
+      initTilt(grid.querySelectorAll('.card:not(.tilt-ready)'));
+      observeCards(grid.querySelectorAll(`.card[data-index]`));
+    }
+
+    function renderFresh() {
+      if (wallpapers.length === 0) {
+        grid.innerHTML = `
+          <div class="state-msg" style="column-span:all">
+            <h2>NOTHING HERE</h2>
+            <p>No wallpapers match your filters. Try something else.</p>
+          </div>`;
+        updateCountBar();
+        return;
+      }
+      grid.innerHTML = wallpapers.map((w, i) => cardHtml(w, i)).join('');
+      updateCountBar();
+      initTilt(document.querySelectorAll('[data-tilt]'));
+      observeCards(document.querySelectorAll('.card'));
     }
 
     /* ═══ Vanilla Tilt Init ═══ */
-    function initTilt() {
-      if (window.matchMedia('(hover: none)').matches) {
-        return;
-      }
-      document.querySelectorAll('[data-tilt]').forEach(el => {
+    function initTilt(nodes) {
+      if (window.matchMedia('(hover: none)').matches) return;
+      (nodes || document.querySelectorAll('[data-tilt]')).forEach(el => {
+        if (el.classList.contains('tilt-ready')) return;
         VanillaTilt.init(el, {
           max: 12, speed: 400, glare: true,
           'max-glare': 0.25, scale: 1.04,
         });
+        el.classList.add('tilt-ready');
       });
     }
 
     /* ═══ Intersection Observer for stagger ═══ */
-    function observeCards() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const idx = parseInt(entry.target.dataset.index) || 0;
-            setTimeout(() => entry.target.classList.add('visible'), idx * 50);
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.05 });
-
-      document.querySelectorAll('.card').forEach(c => observer.observe(c));
+    let cardObserver;
+    function observeCards(nodes) {
+      if (!cardObserver) {
+        cardObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const idx = parseInt(entry.target.dataset.index) || 0;
+              setTimeout(() => entry.target.classList.add('visible'), (idx % PAGE_SIZE) * 40);
+              cardObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.05 });
+      }
+      (nodes || []).forEach(c => {
+        if (!c.classList.contains('visible')) cardObserver.observe(c);
+      });
     }
 
     /* ═══ Set Hero Background (Wallpaper of the day) ═══ */
-    function setHeroBg() {
-      if (wallpapers.length === 0) return;
-      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-      const idx = dayOfYear % wallpapers.length;
-      const wotd = wallpapers[idx];
-      heroBg.style.backgroundImage = `url('${wotd.image_url}')`;
+    async function setHeroBg() {
+      if (heroReady || total <= 0) return;
+      try {
+        const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+        const heroOffset = dayOfYear % total;
+        const params = new URLSearchParams({
+          limit: '1',
+          offset: String(heroOffset),
+          orientation: 'desktop',
+        });
+        const res = await fetch('/api/wallpapers?' + params.toString());
+        if (!res.ok) return;
+        const data = await res.json();
+        const wotd = (data.items || [])[0];
+        if (!wotd) return;
+        heroBg.style.backgroundImage = `url('${thumbOf(wotd)}')`;
+        heroReady = true;
+      } catch (_) { /* ignore */ }
     }
 
-    /* ═══ Fetch ═══ */
-    async function fetchWallpapers() {
-      showSkeletons();
-      try {
-        const res = await fetch('/api/wallpapers');
-        if (!res.ok) throw new Error('Failed');
-        wallpapers = await res.json();
-        if (!Array.isArray(wallpapers)) throw new Error('Bad data');
-        setHeroBg();
-        render();
-      } catch (e) {
-        grid.innerHTML = `
-          <div class="state-msg" style="column-span:all">
-            <h2>FAILED TO LOAD</h2>
-            <p>Could not fetch wallpapers. Make sure the server is running.</p>
-            <button class="btn-retry" onclick="fetchWallpapers()">Retry</button>
-          </div>`;
-        countBar.innerHTML = '';
+    /* ═══ Fetch pages ═══ */
+    async function fetchWallpapers(reset = true) {
+      if (loading) return;
+      if (!reset && !hasMore) return;
+      loading = true;
+
+      if (reset) {
+        offset = 0;
+        wallpapers = [];
+        hasMore = true;
+        showSkeletons();
       }
+
+      try {
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          offset: String(offset),
+          orientation: activeView,
+        });
+        if (activeCategory !== 'All') params.set('category', activeCategory);
+        if (activeRes !== 'All') params.set('resolution', activeRes);
+        const q = searchInput.value.trim();
+        if (q) params.set('q', q);
+
+        const res = await fetch('/api/wallpapers?' + params.toString());
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.items || []);
+        total = Array.isArray(data) ? items.length : (data.total || items.length);
+        hasMore = Array.isArray(data) ? false : !!data.has_more;
+
+        if (reset) {
+          wallpapers = items;
+          renderFresh();
+          setHeroBg();
+        } else {
+          const start = wallpapers.length;
+          wallpapers = wallpapers.concat(items);
+          // If grid was empty-state, rebuild; else append
+          if (start === 0) renderFresh();
+          else {
+            appendCards(items, start);
+            updateCountBar();
+          }
+        }
+
+        offset += items.length;
+        if (items.length === 0) hasMore = false;
+      } catch (e) {
+        if (reset) {
+          grid.innerHTML = `
+            <div class="state-msg" style="column-span:all">
+              <h2>FAILED TO LOAD</h2>
+              <p>Could not fetch wallpapers. Make sure the server is running.</p>
+              <button class="btn-retry" onclick="fetchWallpapers(true)">Retry</button>
+            </div>`;
+          countBar.innerHTML = '';
+        }
+      } finally {
+        loading = false;
+      }
+    }
+
+    /* Infinite scroll */
+    const infiniteObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) fetchWallpapers(false);
+    }, { rootMargin: '600px 0px' });
+    infiniteObserver.observe(loadSentinel);
+
+    function resetAndFetch() {
+      heroReady = false;
+      fetchWallpapers(true);
     }
 
     /* ═══ Events ═══ */
     filtersEl.addEventListener('click', e => {
       const btn = e.target.closest('.filter-btn');
-      if (!btn) return;
+      if (!btn || !btn.dataset.cat) return;
       filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeCategory = btn.dataset.cat;
-      render();
+      resetAndFetch();
     });
 
     document.getElementById('viewTabs').addEventListener('click', e => {
@@ -1131,7 +1213,7 @@
       document.querySelectorAll('#viewTabs .view-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeView = btn.dataset.view;
-      render();
+      resetAndFetch();
     });
 
     document.getElementById('resTabs').addEventListener('click', e => {
@@ -1140,10 +1222,14 @@
       document.querySelectorAll('#resTabs .view-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeRes = btn.dataset.res;
-      render();
+      resetAndFetch();
     });
 
-    searchInput.addEventListener('input', render);
+    let searchTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(resetAndFetch, 300);
+    });
 
     /* ═══ Lightbox JS ═══ */
     const lightbox = document.getElementById('lightbox');
@@ -1158,15 +1244,21 @@
     window.openLightbox = function (index) {
       const w = wallpapers[index];
       if (!w) return;
-      lbCurrentUrl = w.image_url;
-      lbCurrentTitle = w.title.replace(/\[.*?\]/g, '').trim();
+      lbCurrentUrl = fullOf(w);
+      lbCurrentTitle = (w.title || '').replace(/\[.*?\]/g, '').trim();
 
-      lbImg.src = lbCurrentUrl;
+      // Show thumb first if present, then swap to full
+      lbImg.src = thumbOf(w);
+      if (w.thumb_url && w.image_url && w.thumb_url !== w.image_url) {
+        const full = new Image();
+        full.onload = () => { if (lbCurrentUrl === fullOf(w)) lbImg.src = fullOf(w); };
+        full.src = fullOf(w);
+      }
       lbTitle.textContent = lbCurrentTitle;
       lbTags.innerHTML = (w.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
       lightbox.classList.add('active');
-      document.body.style.overflow = 'hidden'; // prevent scroll
+      document.body.style.overflow = 'hidden';
     };
 
     function closeLightbox() {
@@ -1210,7 +1302,7 @@
         else b.classList.remove('active');
       });
     }
-    fetchWallpapers();
+    fetchWallpapers(true);
   </script>
 </body>
 
