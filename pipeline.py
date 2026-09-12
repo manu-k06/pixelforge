@@ -68,6 +68,13 @@ PROMPT = (
     "low resolution, unappealing, square format, "
     "non-standard aspect ratio, not suitable as a "
     "desktop or mobile wallpaper. "
+    "STRICTLY reject NSFW or suggestive content, including: "
+    "anime girls in bikini, swimsuit, lingerie, underwear, "
+    "revealing/skimpy clothing, fanservice, sexualized poses, "
+    "nude or partial nude, cleavage-focused shots, ecchi, "
+    "hentai-adjacent, or anything meant to be sexy rather than "
+    "a clean wallpaper. Safe SFW anime characters in normal "
+    "clothing are OK. "
     "Reply JSON only, no markdown:\n"
     "{\n"
     '  "approved": true or false,\n'
@@ -77,6 +84,20 @@ PROMPT = (
     'Abstract, Cyberpunk, Minimal, Fantasy, AI Art"\n'
     "}"
 )
+
+# Text/title safety net (Gemini can miss; Reddit titles often leak intent)
+NSFW_KEYWORDS = (
+    "bikini", "swimsuit", "swimwear", "lingerie", "underwear",
+    "nsfw", "nude", "naked", "sexy", "suggestive", "ecchi",
+    "hentai", "fanservice", "lewd", "cleavage", "topless",
+    "bottomless", "skimpy", "revealing", "seductive", "waifu sexy",
+    "in bikini", "microbikini", "sling bikini", "beach girl",
+)
+
+
+def is_nsfw_text(*parts: str) -> bool:
+    blob = " ".join(p for p in parts if p).lower()
+    return any(kw in blob for kw in NSFW_KEYWORDS)
 
 
 def is_direct_image(url: str) -> bool:
@@ -336,6 +357,17 @@ def run_pipeline():
                 break
             data = post["data"]
             image_url = data["url"]
+            reddit_title = data.get("title", "") or ""
+
+            if data.get("over_18"):
+                print(f"  ⊘ Skipping NSFW (over_18): {reddit_title[:60]}")
+                sys.stdout.flush()
+                continue
+
+            if is_nsfw_text(reddit_title):
+                print(f"  ⊘ Skipping suggestive title: {reddit_title[:60]}")
+                sys.stdout.flush()
+                continue
 
             if image_url in existing_urls:
                 print(f"  ⊘ Skipping duplicate: {image_url[:60]}…")
@@ -357,6 +389,13 @@ def run_pipeline():
 
             if judgement is None:
                 print(f"Result: rejected")
+                sys.stdout.flush()
+                continue
+
+            judged_title = judgement.get("title", "") or ""
+            judged_tags = " ".join(judgement.get("tags") or [])
+            if is_nsfw_text(judged_title, judged_tags, reddit_title):
+                print(f"Result: rejected (suggestive content filter)")
                 sys.stdout.flush()
                 continue
 
