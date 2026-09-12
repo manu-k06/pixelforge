@@ -77,11 +77,14 @@ class handler(BaseHTTPRequestHandler):
 
         try:
             response = requests.get(url, headers=headers, timeout=30)
-            if response.status_code != 200:
+            if response.status_code not in (200, 206):
                 self._json(response.status_code, {"error": "Failed to fetch", "detail": response.text[:200]})
                 return
 
             items = response.json()
+            if not isinstance(items, list):
+                self._json(500, {"error": "Unexpected response shape"})
+                return
             total = len(items)
             # Content-Range: 0-35/715
             cr = response.headers.get("Content-Range") or response.headers.get("content-range")

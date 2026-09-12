@@ -86,10 +86,12 @@ def get_wallpapers():
 
     headers = {**READ_HEADERS, "Prefer": "count=exact"}
     res = requests.get(f"{SUPABASE_URL}/rest/v1/wallpapers?{query}", headers=headers, timeout=30)
-    if res.status_code != 200:
+    if res.status_code not in (200, 206):
         return jsonify({"error": "Failed to fetch", "detail": res.text[:200]}), res.status_code
 
     items = res.json()
+    if not isinstance(items, list):
+        return jsonify({"error": "Unexpected response shape"}), 500
     total = len(items)
     cr = res.headers.get("Content-Range") or res.headers.get("content-range")
     if cr and "/" in cr:
