@@ -358,44 +358,41 @@
       font-weight: 600;
     }
 
-    /* ───── Masonry Grid ───── */
+    /* ───── Masonry Grid (stable flex columns — no CSS-column reshuffle) ───── */
     .masonry {
-      columns: 4;
-      column-gap: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
     }
 
-    @media (max-width: 1200px) {
-      .masonry {
-        columns: 3;
-      }
+    .masonry-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .masonry-empty {
+      flex: 1;
+      width: 100%;
+      text-align: center;
+      padding: 48px 16px;
     }
 
     @media (max-width: 768px) {
       .masonry {
-        columns: unset !important;
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
+        gap: 10px;
       }
       .card {
-        break-inside: unset !important;
-        margin-bottom: 0 !important;
-        width: 100% !important;
         animation-delay: 0ms !important;
         transition: opacity 0.2s ease !important;
       }
     }
 
-    @media (max-width: 480px) {
-      .masonry {
-        grid-template-columns: repeat(1, 1fr) !important;
-      }
-    }
-
     /* ───── Card ───── */
     .card {
-      break-inside: avoid;
-      margin-bottom: 12px;
+      width: 100%;
       border-radius: var(--radius);
       overflow: hidden;
       background: var(--card-bg);
@@ -403,8 +400,8 @@
       backdrop-filter: blur(10px);
       position: relative;
       opacity: 0;
-      transform: translateY(30px);
-      transition: opacity .5s ease, transform .5s ease, box-shadow var(--transition);
+      transform: translateY(12px);
+      transition: opacity .35s ease, transform .35s ease, box-shadow var(--transition);
     }
 
     .card.visible {
@@ -419,10 +416,19 @@
     .card-img-wrap {
       position: relative;
       overflow: hidden;
+      width: 100%;
+      background: #111;
+      aspect-ratio: 16 / 10;
+    }
+
+    .card-img-wrap.orient-mobile {
+      aspect-ratio: 9 / 16;
     }
 
     .card-img-wrap img {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
       transition: transform .6s ease;
     }
@@ -530,8 +536,7 @@
 
     /* ───── Skeleton ───── */
     .skeleton {
-      break-inside: avoid;
-      margin-bottom: 12px;
+      width: 100%;
       border-radius: var(--radius);
       overflow: hidden;
       background: var(--card-bg);
@@ -540,9 +545,14 @@
 
     .sk-img {
       width: 100%;
+      aspect-ratio: 16 / 10;
       background: linear-gradient(110deg, #111 30%, #1a1a1a 50%, #111 70%);
       background-size: 200% 100%;
       animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton.orient-mobile .sk-img {
+      aspect-ratio: 9 / 16;
     }
 
     .sk-body {
@@ -975,21 +985,59 @@
     scrollTopBtn.addEventListener('mouseover', () => { scrollTopBtn.style.transform = 'scale(1.1)'; scrollTopBtn.style.boxShadow = '0 6px 25px rgba(249,115,22,0.6)'; });
     scrollTopBtn.addEventListener('mouseout', () => { scrollTopBtn.style.transform = 'scale(1)'; scrollTopBtn.style.boxShadow = '0 4px 20px rgba(249,115,22,0.4)'; });
 
-    /* ═══ Skeleton ═══ */
-    const skeletonHeights = [220, 300, 260, 340, 240, 280, 310, 200, 250, 290, 270, 320];
-    function showSkeletons(n = 12) {
+    /* ═══ Stable column masonry ═══ */
+    function colCount() {
+      const w = window.innerWidth;
+      if (w <= 480) return 1;
+      if (w <= 768) return 2;
+      if (w <= 1200) return 3;
+      return 4;
+    }
+
+    function ensureColumns(force = false) {
+      const n = colCount();
+      if (!force && grid.dataset.cols === String(n) && grid.querySelectorAll('.masonry-col').length === n) {
+        return Array.from(grid.querySelectorAll('.masonry-col'));
+      }
+      grid.dataset.cols = String(n);
       grid.innerHTML = '';
-      countBar.innerHTML = '';
       for (let i = 0; i < n; i++) {
-        const h = skeletonHeights[i % skeletonHeights.length];
-        grid.innerHTML += `
-          <div class="skeleton">
-            <div class="sk-img" style="height:${h}px"></div>
+        const col = document.createElement('div');
+        col.className = 'masonry-col';
+        col.dataset.col = String(i);
+        grid.appendChild(col);
+      }
+      return Array.from(grid.querySelectorAll('.masonry-col'));
+    }
+
+    function shortestCol(cols) {
+      let best = cols[0];
+      let bestH = best.getBoundingClientRect().height;
+      for (let i = 1; i < cols.length; i++) {
+        const h = cols[i].getBoundingClientRect().height;
+        if (h < bestH) {
+          best = cols[i];
+          bestH = h;
+        }
+      }
+      return best;
+    }
+
+    /* ═══ Skeleton ═══ */
+    function showSkeletons(n = 12) {
+      countBar.innerHTML = '';
+      const cols = ensureColumns(true);
+      const isMobileView = activeView === 'mobile';
+      for (let i = 0; i < n; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'skeleton' + (isMobileView ? ' orient-mobile' : '');
+        sk.innerHTML = `
+            <div class="sk-img"></div>
             <div class="sk-body">
               <div class="sk-line w70"></div>
               <div class="sk-line w40"></div>
-            </div>
-          </div>`;
+            </div>`;
+        cols[i % cols.length].appendChild(sk);
       }
     }
 
@@ -1019,9 +1067,10 @@
       const cleanTitle = (w.title || '').replace(/\[.*?\]/g, '').trim();
       const thumb = thumbOf(w);
       const full = fullOf(w);
+      const orientClass = (w.orientation === 'mobile') ? ' orient-mobile' : '';
       return `
         <div class="card" data-tilt data-tilt-max="12" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.25" data-tilt-scale="1.04" data-index="${i}">
-          <div class="card-img-wrap" style="cursor: pointer" onclick="openLightbox(${i})">
+          <div class="card-img-wrap${orientClass}" style="cursor: pointer" onclick="openLightbox(${i})">
             <img src="${thumb}" alt="${cleanTitle}" loading="lazy" decoding="async" />
             <div class="img-gradient"></div>
             <div class="category-badge">${w.category || ''}</div>
@@ -1047,27 +1096,46 @@
       countBar.innerHTML = `<span>${total}</span>&nbsp;wallpaper${total !== 1 ? 's' : ''}${activeCategory !== 'All' ? ' in ' + activeCategory : ''}`;
     }
 
+    function mountCard(html, preferShortest) {
+      const cols = ensureColumns(false);
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html.trim();
+      const card = wrap.firstElementChild;
+      const col = preferShortest ? shortestCol(cols) : cols[0];
+      col.appendChild(card);
+      return card;
+    }
+
     function appendCards(items, startIndex) {
-      const html = items.map((w, i) => cardHtml(w, startIndex + i)).join('');
-      grid.insertAdjacentHTML('beforeend', html);
-      initTilt(grid.querySelectorAll('.card:not(.tilt-ready)'));
-      observeCards(grid.querySelectorAll(`.card[data-index]`));
+      const newCards = [];
+      items.forEach((w, i) => {
+        newCards.push(mountCard(cardHtml(w, startIndex + i), true));
+      });
+      initTilt(newCards);
+      observeCards(newCards);
     }
 
     function renderFresh() {
       if (wallpapers.length === 0) {
+        grid.dataset.cols = '';
         grid.innerHTML = `
-          <div class="state-msg" style="column-span:all">
+          <div class="masonry-empty state-msg">
             <h2>NOTHING HERE</h2>
             <p>No wallpapers match your filters. Try something else.</p>
           </div>`;
         updateCountBar();
         return;
       }
-      grid.innerHTML = wallpapers.map((w, i) => cardHtml(w, i)).join('');
+      const cols = ensureColumns(true);
+      // Round-robin keeps order stable across reloads; heights reserved so no reshuffle
+      wallpapers.forEach((w, i) => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = cardHtml(w, i).trim();
+        cols[i % cols.length].appendChild(wrap.firstElementChild);
+      });
       updateCountBar();
-      initTilt(document.querySelectorAll('[data-tilt]'));
-      observeCards(document.querySelectorAll('.card'));
+      initTilt(grid.querySelectorAll('[data-tilt]'));
+      observeCards(grid.querySelectorAll('.card'));
     }
 
     /* ═══ Vanilla Tilt Init ═══ */
@@ -1090,17 +1158,27 @@
         cardObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              const idx = parseInt(entry.target.dataset.index) || 0;
-              setTimeout(() => entry.target.classList.add('visible'), (idx % PAGE_SIZE) * 40);
+              entry.target.classList.add('visible');
               cardObserver.unobserve(entry.target);
             }
           });
-        }, { threshold: 0.05 });
+        }, { threshold: 0.05, rootMargin: '40px' });
       }
       (nodes || []).forEach(c => {
         if (!c.classList.contains('visible')) cardObserver.observe(c);
       });
     }
+
+    // Rebuild columns on breakpoint change without reshuffling mid-scroll heights
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!wallpapers.length) return;
+        if (grid.dataset.cols === String(colCount())) return;
+        renderFresh();
+      }, 150);
+    });
 
     /* ═══ Set Hero Background (Wallpaper of the day) ═══ */
     async function setHeroBg() {
@@ -1174,7 +1252,7 @@
       } catch (e) {
         if (reset) {
           grid.innerHTML = `
-            <div class="state-msg" style="column-span:all">
+            <div class="masonry-empty state-msg">
               <h2>FAILED TO LOAD</h2>
               <p>Could not fetch wallpapers. Make sure the server is running.</p>
               <button class="btn-retry" onclick="fetchWallpapers(true)">Retry</button>
