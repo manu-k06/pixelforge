@@ -143,30 +143,51 @@
       color: #e2e8f0;
     }
 
-    /* --- GRID --- */
-    .grid { columns: 3; column-gap: 24px; padding-bottom: 24px; }
-    @media (max-width: 1024px) { .grid { columns: 2; } }
-    @media (max-width: 640px) { .grid { columns: 1; } }
+    /* --- GRID (stable flex columns — no CSS-column reshuffle) --- */
+    .grid {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding-bottom: 24px;
+    }
+    .grid-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) { .grid { gap: 16px; } }
     
     .empty-state {
-      column-span: all; text-align: center; padding: 80px 20px;
+      flex: 1;
+      width: 100%;
+      text-align: center; padding: 80px 20px;
       color: var(--text-muted); font-size: 1.2rem; background: var(--bg-card);
       border-radius: var(--radius); border: 1px dashed var(--border);
     }
 
     /* --- CARD --- */
     .card {
-      break-inside: avoid; margin-bottom: 24px;
+      width: 100%;
       background: #0f0f0f; border: 1px solid var(--border); border-radius: var(--radius);
       overflow: hidden; display: flex; flex-direction: column;
       transition: opacity 0.4s ease, transform 0.4s ease;
       position: relative;
     }
     .card.removing { opacity: 0; transform: scale(0.95); pointer-events: none; }
-    .card-img {
-      width: 100%; height: auto; object-fit: cover; cursor: zoom-in;
-      border-bottom: 1px solid var(--border); background: #111;
+    .card-img-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: #111;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
       border-radius: 12px 12px 0 0;
+    }
+    .card-img-wrap.orient-mobile { aspect-ratio: 9 / 16; }
+    .card-img {
+      width: 100%; height: 100%; object-fit: cover; cursor: zoom-in;
+      display: block;
     }
     .card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
     
@@ -443,6 +464,38 @@
     }
 
     /* RENDERERS */
+    function adminColCount() {
+      const w = window.innerWidth;
+      if (w <= 640) return 1;
+      if (w <= 1024) return 2;
+      return 3;
+    }
+
+    function fillStableGrid(grid, items, mode) {
+      if (!items.length) {
+        grid.dataset.cols = '';
+        grid.innerHTML = mode === 'pending'
+          ? `<div class="empty-state">No pending wallpapers. Run pipeline.py to fetch new ones.</div>`
+          : `<div class="empty-state">No wallpapers match your filters.</div>`;
+        return;
+      }
+      const n = adminColCount();
+      grid.dataset.cols = String(n);
+      grid.innerHTML = '';
+      const cols = [];
+      for (let i = 0; i < n; i++) {
+        const col = document.createElement('div');
+        col.className = 'grid-col';
+        grid.appendChild(col);
+        cols.push(col);
+      }
+      items.forEach((wp, i) => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = buildCardHtml(wp, mode).trim();
+        cols[i % n].appendChild(wrap.firstElementChild);
+      });
+    }
+
     function buildCardHtml(wp, mode) {
       const controlsHtml = mode === 'pending' ? `
         <button class="action-btn approve" onclick="handlePendingAction('${wp.id}', 'approve')">APPROVE</button>
@@ -451,14 +504,18 @@
         <button class="action-btn save" onclick="handleLibraryAction('${wp.id}', 'update')">Save</button>
         <button class="action-btn reject" onclick="removeWallpaper('${wp.id}')">Remove</button>
       `;
+      const orientClass = wp.orientation === 'mobile' ? ' orient-mobile' : '';
+      const safeTitle = (wp.title || '').replace(/"/g, '&quot;');
 
       return `
         <div class="card" id="card-${wp.id}">
-          <img class="card-img" src="${wp.thumb_url || wp.image_url}" onclick="openLightbox('${mode}', '${wp.id}')" loading="lazy">
+          <div class="card-img-wrap${orientClass}">
+            <img class="card-img" src="${wp.thumb_url || wp.image_url}" onclick="openLightbox('${mode}', '${wp.id}')" loading="lazy" decoding="async">
+          </div>
           <div class="card-body">
             <div class="field">
               <label>Title</label>
-              <input type="text" class="input-ui" id="title-${mode}-${wp.id}" value="${wp.title.replace(/"/g, '&quot;')}">
+              <input type="text" class="input-ui" id="title-${mode}-${wp.id}" value="${safeTitle}">
             </div>
             <div class="field">
               <label>Category</label>
@@ -471,8 +528,8 @@
               <input type="text" class="input-ui" id="tags-${mode}-${wp.id}" value="${(wp.tags || []).join(', ')}">
             </div>
             <div class="meta-row">
-              <span>r/${wp.subreddit}</span>
-              <span>👍 ${wp.upvotes}</span>
+              <span>r/${wp.subreddit || '—'}</span>
+              <span>👍 ${wp.upvotes ?? 0}</span>
             </div>
             <div class="card-actions">${controlsHtml}</div>
           </div>
@@ -483,11 +540,7 @@
     function renderPending() {
       const grid = document.getElementById('grid-pending');
       document.getElementById('pending-count').textContent = `${pendingData.length} wallpaper${pendingData.length !== 1 ? 's' : ''} pending review`;
-      if (pendingData.length === 0) {
-        grid.innerHTML = `<div class="empty-state">No pending wallpapers. Run pipeline.py to fetch new ones.</div>`;
-      } else {
-        grid.innerHTML = pendingData.map(wp => buildCardHtml(wp, 'pending')).join('');
-      }
+      fillStableGrid(grid, pendingData, 'pending');
     }
 
     function renderLibrary() {
@@ -496,19 +549,26 @@
       const filterCat = document.getElementById('lib-category-filter').value;
 
       const filtered = libraryData.filter(wp => {
-        const titleMatch = wp.title.toLowerCase().includes(searchQ);
+        const titleMatch = (wp.title || '').toLowerCase().includes(searchQ);
         const catMatch = filterCat === 'All' || wp.category === filterCat;
         return titleMatch && catMatch;
       });
 
       document.getElementById('library-count').textContent = `${filtered.length} wallpaper${filtered.length !== 1 ? 's' : ''} in library`;
-      
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state">No wallpapers match your filters.</div>`;
-      } else {
-        grid.innerHTML = filtered.map(wp => buildCardHtml(wp, 'library')).join('');
-      }
+      fillStableGrid(grid, filtered, 'library');
     }
+
+    let adminResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(adminResizeTimer);
+      adminResizeTimer = setTimeout(() => {
+        const pendingGrid = document.getElementById('grid-pending');
+        const libraryGrid = document.getElementById('grid-library');
+        const n = String(adminColCount());
+        if (pendingGrid && pendingData.length && pendingGrid.dataset.cols !== n) renderPending();
+        if (libraryGrid && libraryData.length && libraryGrid.dataset.cols !== n) renderLibrary();
+      }, 150);
+    });
 
     /* ACTION HANDLERS */
     function gatherFields(id, mode) {
